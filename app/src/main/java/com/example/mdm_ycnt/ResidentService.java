@@ -225,7 +225,6 @@ public class ResidentService extends Service {
 
             /*if(cmd.equals("nocmd")){
             }*/
-            //88888888888
 
             try {
 
