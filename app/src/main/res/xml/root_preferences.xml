@@ -1,0 +1,105 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/setting_common_header"
+        app:isPreferenceVisible="false"
+        >
+
+
+        <!--<EditTextPreference
+            app:key="signature"
+            app:title="@string/signature_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="reply"
+            app:entries="@array/reply_entries"
+            app:entryValues="@array/reply_values"
+            app:key="reply"
+            app:title="@string/reply_title"
+            app:useSimpleSummaryProvider="true" />-->
+
+        <SwitchPreferenceCompat
+            app:key="setting_TimeSwitch_open"
+            app:defaultValue="false"
+            app:title="@string/setting_TimeSwitch_open_title"
+            app:summaryOff="@string/setting_summary_off"
+            app:summaryOn="@string/setting_summary_on"
+            app:isPreferenceVisible="false"
+            /><!--隱藏 app:isPreferenceVisible="false"-->
+
+        <SwitchPreferenceCompat
+            app:key="setting_TimeSwitch_close"
+            app:defaultValue="false"
+            app:title="@string/setting_TimeSwitch_close_title"
+            app:summaryOff="@string/setting_summary_off"
+            app:summaryOn="@string/setting_summary_on"
+            app:isPreferenceVisible="false"
+            /><!--隱藏 app:isPreferenceVisible="false"-->
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/setting_update">
+        <Preference
+            app:key="setting_update_iMDS_app"
+            app:title="@string/setting_update_iMDS_app_title"
+            app:summary="@string/setting_update_iMDS_app_summary"
+            />
+
+        <Preference
+            app:key="setting_update_control_app"
+            app:title="@string/setting_update_control_app_title"
+            app:summary="@string/setting_update_control_app_summary"
+            />
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/setting_other"
+                        app:key="setting_other"
+                        app:isPreferenceVisible="false">
+
+        <Preference
+            app:key="setting_iPTS_control_qr_code"
+            app:title="@string/setting_iPTS_control_qr_code_title"
+            app:summary="@string/setting_iPTS_control_qr_code_summary"/>
+
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory app:title="@string/setting_about_header">
+
+        <Preference
+            app:key="setting_device_manufacturer"
+            app:title="@string/setting_device_manufacturer_title"
+            app:summary=""/>
+
+        <Preference
+            app:key="setting_device_model"
+            app:title="@string/setting_device_model_title"
+            app:summary=""/>
+
+        <Preference
+            app:key="setting_control_app_version"
+            app:title="@string/setting_control_app_version_title"
+            app:summary=""/>
+
+        <Preference
+            app:key="setting_app_version"
+            app:title="@string/setting_app_version_title"
+            app:summary="@string/versionName"/>
+
+        <!--<SwitchPreferenceCompat
+            app:key="sync"
+            app:title="@string/sync_title" />
+
+        <SwitchPreferenceCompat
+            app:dependency="sync"
+            app:key="attachment"
+            app:summaryOff="@string/attachment_summary_off"
+            app:summaryOn="@string/attachment_summary_on"
+            app:title="@string/attachment_title" />-->
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

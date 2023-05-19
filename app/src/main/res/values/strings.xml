@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">iMDS</string>
+    <string name="title_activity_settings">設定</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails</string>
+
+    <!-- SettingsActiviry -->
+    <string name="setting_common_header">一般</string>
+    <string name="setting_update">更新</string>
+    <string name="setting_other">其他</string>
+    <string name="setting_about_header">關於</string>
+
+    <string name="setting_summary_on">開啟</string>
+    <string name="setting_summary_off">關閉</string>
+
+    <string name="setting_TimeSwitch_open_title">定時結束休眠</string>
+    <string name="setting_TimeSwitch_close_title">定時開始休眠</string>
+
+    <string name="setting_update_iMDS_app_title">更新iMDS</string>
+    <string name="setting_update_iMDS_app_summary">檢查iMDS版本</string><!--更新iMDS至最新版本-->
+
+    <string name="setting_update_control_app_title">更新控制APP</string>
+    <string name="setting_update_control_app_summary">檢查控制APP版本</string><!--更新iMDS至最新版本-->
+
+    <string name="setting_app_version_title">iMDS應用程式版本</string>
+    <string name="setting_device_manufacturer_title">電視品牌</string>
+    <string name="setting_device_model_title">電視型號</string>
+    <string name="setting_control_app_version_title">控制APP版本</string>
+
+    <string name="setting_iPTS_control_qr_code_title">iPTS控制</string>
+    <string name="setting_iPTS_control_qr_code_summary">透過iPTS控制</string>
+
+
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <!--<string name="mdm_default_url">http://192.168.89.140/mdm/</string>-->
+    <string name="mdm_default_url">http://icast.tw/mdm/</string>
+</resources>
