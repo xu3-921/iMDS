@@ -58,10 +58,10 @@ public class UniversalFunction {
     public static String GetServerIP(Context mContext){
 
 
-        String url_domain = "http://192.168.89.140/mdm/";
+        //String url_domain = "http://192.168.89.140/mdm/";
 
-        /*String url_domain = mContext.getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
-                            .getString("server_ip", mContext.getResources().getString(R.string.mdm_default_url));*/
+        String url_domain = mContext.getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
+                            .getString("server_ip", mContext.getResources().getString(R.string.mdm_default_url));
 
         return url_domain;
 
@@ -504,7 +504,7 @@ public class UniversalFunction {
 
         String controlAppPackageName = getApplicationContext().getSharedPreferences("mdm_ycnt",MODE_PRIVATE).getString("control_app_package_name",null);
 
-        if(controlAppPackageName != null){
+        if(controlAppPackageName != null && controlAppPackageName != "otherDevicePackageName"){
 
             int nowAppVersionCode = UniversalFunction.getAppVersionCode(controlAppPackageName);
 

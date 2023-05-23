@@ -10,7 +10,7 @@ android {
         minSdk 21
         targetSdk 31
         versionCode 4
-        versionName "1.0.5-beta-202305151042"//
+        versionName "1.0.5"//-beta-202305151042
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -13,13 +13,16 @@
         android:layout_gravity="center"
         android:background="@color/colorPrimaryDark">
 
+        <!--android:layout_width="0dp"-->
+
+
         <TextView
             android:id="@+id/textview_marquee"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:lines="1"
-            android:gravity="center_vertical"
             android:layout_gravity="center"
+            android:gravity="center_vertical"
+            android:lines="1"
             android:text=""
             android:textColor="@color/white"
             android:textSize="75px"
@@ -36,6 +39,15 @@
             android:textSize="15dp"
             android:text="✕"
             android:textColor="@color/colorWhite" />
+
+        <!--<androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imageView"
+            android:layout_width="24dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="left|top"
+            android:background="@color/dark_blue"
+            app:srcCompat="@drawable/ic_arrows_vertical"
+            />-->
 
     </FrameLayout>
 

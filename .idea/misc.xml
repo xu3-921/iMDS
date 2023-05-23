@@ -19,6 +19,16 @@
     <option name="pathToUserRulesConfiguration" value="" />
     <option name="pathToJarWithRules" value="" />
   </component>
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/iMDS/mdm_ycnt/app/src/main/res/drawable-v24/arrows-h_24.xml" value="0.2265" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/iMDS/mdm_ycnt/app/src/main/res/drawable/ic_arrows_vertical.xml" value="0.2265" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/iMDS/mdm_ycnt/app/src/main/res/layout/alert_select_divice_model.xml" value="0.24947916666666667" />
+        <entry key="..\:/Users/ASUS/AndroidStudioProjects/iMDS/mdm_ycnt/app/src/main/res/layout/floatingwindow_marquee.xml" value="0.24947916666666667" />
+      </map>
+    </option>
+  </component>
   <component name="FindBugsConfigurable">
     <option name="make" value="true" />
     <option name="effort" value="default" />

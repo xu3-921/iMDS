@@ -303,8 +303,6 @@ public class ResidentService extends Service {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            //Log.e("tttt","-----------------------------------------------------------");
         }
     }
 
@@ -418,7 +416,7 @@ public class ResidentService extends Service {
 
                                 F_tidy_get_cmd(G_control_app_package_name,G_cmd);
 
-                                editor.putString("control_app_package_name",G_control_app_package_name);
+                                //editor.putString("control_app_package_name",G_control_app_package_name);
 
                             }
 
@@ -770,6 +768,17 @@ public class ResidentService extends Service {
     }
 
     private void F_tidy_get_cmd(String control_app_package_name,String getCmd){
+
+        /*JSONObject a = new JSONObject();
+        try {
+            a.put("set-marquee", "{\"text\":\"44~~\",\"time\":\"300\"}");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        getCmd = String.valueOf(a);
+
+        Log.e("val",getCmd);*/
 
         if(getCmd.equals("nocmd")){
 

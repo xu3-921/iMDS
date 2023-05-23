@@ -84,9 +84,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayAdapter<String> adapterDeviceManufacturerItems;
     ArrayAdapter<String> adapterDeviceModelItems;
 
-    //boolean isFirstTimeOpen = true;
+    boolean isFirstTimeOpen = true;
     boolean isToReload = false;
-
 
 
     @SuppressLint("SetTextI18n")
@@ -112,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
             else if((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && !Settings.canDrawOverlays(MainActivity.this)){
 
                 createAlertDialogGetDrawOverlaysPermission();
-                //Log.e("testGet","fa");
 
             }
             else {
@@ -429,12 +427,16 @@ public class MainActivity extends AppCompatActivity {
             timer.schedule(task, 0,1000 * 10);
 
 
-            try {
-                setDeviceControlMethodProcess();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            new Thread(() -> {
 
+                try {
+                    setDeviceControlMethodProcess();
+
+                } catch (InterruptedException | JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }).start();
 
 
         }
@@ -485,20 +487,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
 
         super.onResume();
-        //Log.e("tttpermissions","onResume");
+        //Log.e("ttt","onResume");
 
-
-        /*if(isFirstTimeOpen){
+        if(isFirstTimeOpen){
             isFirstTimeOpen = false;
         }else{
+            isToReload = true;
+        }
 
-            if(isToReload){
-                F_reload_to_registered();
-            }
-
-        }*/
 
         if(isToReload){
+
             F_reload_to_registered();
             isToReload = false;
         }
@@ -522,10 +521,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     @SuppressLint("SetTextI18n")
-    private void setDeviceControlMethodProcess() throws InterruptedException {
+    private void setDeviceControlMethodProcess() throws InterruptedException, JSONException {
 
         String control_app_package_name = getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
                                         .getString("control_app_package_name", null);
+
+        JSONObject getDeviceModelVal = HttpPost_getDeviceModelInfo(F_get_system_name());
+
+        String controlAppPackageName = getDeviceModelVal.getString("ad_mdm_device_control_app_package_name");
 
         boolean isSuccessEnter = true;
 
@@ -535,103 +538,125 @@ public class MainActivity extends AppCompatActivity {
 
         }
         else if(control_app_package_name.equals("otherDevicePackageName")){
-            isSuccessEnter = true;
+
+            if(control_app_package_name.equals(controlAppPackageName)){
+
+                isSuccessEnter = true;
+
+            }else{
+
+                isSuccessEnter = false;
+
+            }
 
         }
         else{
 
-            boolean hasInstalledControlApp = UniversalFunction.hasInstalledThisApp(control_app_package_name);
-            isSuccessEnter = hasInstalledControlApp;
+            if(controlAppPackageName.equals("otherDevicePackageName")){
+
+                isSuccessEnter = false;
+
+
+            }else{
+                boolean hasInstalledControlApp = UniversalFunction.hasInstalledThisApp(controlAppPackageName);
+
+                isSuccessEnter = hasInstalledControlApp;
+
+            }
+
 
         }
 
+
         if(isSuccessEnter){
+
             //成功進入
 
             if(loadingPd.isShowing()){
                 loadingPd.dismiss();
             }
 
+            //寫入packageName
+            SharedPreferences pref = getSharedPreferences("mdm_ycnt", MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+
+            String deviceManufacturerName = getDeviceModelVal.getString("ad_mdm_device_manufacturer");
+            String deviceModelName = getDeviceModelVal.getString("ad_mdm_device_model_name");
+
+            editor.putString("device_manufacturer_name",deviceManufacturerName);
+            editor.putString("device_model_name",deviceModelName);
+            editor.putString("control_app_package_name",controlAppPackageName);
+
+            editor.apply();
+
             F_start_ResidentService();
 
         }
         else{
 
-            Thread thread = new Thread(() -> {
+            ArrayList<String> ControlAppList = UniversalFunction.getInstalledControlAppList(this);
+            boolean isControlAppListHasVal = ControlAppList.size() != 0;
 
-                ArrayList<String> ControlAppList = UniversalFunction.getInstalledControlAppList(this);
+            try {
 
-                boolean isControlAppListHasVal = ControlAppList.size() != 0;
+                String deviceModelId = getDeviceModelVal.getString("ad_mdm_device_model");
 
+                if(deviceModelId.equals("notFindDevice")){
 
-                JSONObject getDeviceModelVal = HttpPost_getDeviceModelInfo(F_get_system_name());
+                    F_reload_to_registered();
 
-                try {
+                }else if(deviceModelId.equals("notSet")){
+                    //選擇型號
+                    showSelectDeviceAlert(null, null);
 
-                    String deviceModelId = getDeviceModelVal.getString("ad_mdm_device_model");
+                }else{
 
+                    if(isControlAppListHasVal){
 
-                    if(deviceModelId.equals("notFindDevice")){
-                        F_reload_to_registered();
+                        if(ControlAppList.contains(controlAppPackageName)){
 
-                    }else if(deviceModelId.equals("notSet")){
-                        //選擇型號
-                        showSelectDeviceAlert(null, null);
+                            //寫入packageName
+                            SharedPreferences pref = getSharedPreferences("mdm_ycnt", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = pref.edit();
 
-                    }else{
+                            String deviceManufacturerName = getDeviceModelVal.getString("ad_mdm_device_manufacturer");
+                            String deviceModelName = getDeviceModelVal.getString("ad_mdm_device_model_name");
 
-                        String controlAppPackageName = getDeviceModelVal.getString("ad_mdm_device_control_app_package_name");
+                            editor.putString("device_manufacturer_name",deviceManufacturerName);
+                            editor.putString("device_model_name",deviceModelName);
+                            editor.putString("control_app_package_name",controlAppPackageName);
 
-                        if(isControlAppListHasVal){
+                            editor.apply();
 
-                            if(ControlAppList.contains(controlAppPackageName)){
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    loadingPd.dismiss();
+                                }
+                            });
 
-                                //寫入packageName
-                                SharedPreferences pref = getSharedPreferences("mdm_ycnt", MODE_PRIVATE);
-                                SharedPreferences.Editor editor = pref.edit();
+                            F_start_ResidentService();
 
-                                String deviceManufacturerName = getDeviceModelVal.getString("ad_mdm_device_manufacturer");
-                                String deviceModelName = getDeviceModelVal.getString("ad_mdm_device_model_name");
+                        }
+                        /*else if(controlAppPackageName.equals("otherDevicePackageName")){
+                            showSelectDeviceAlert(deviceModelId,controlAppPackageName);
 
-                                editor.putString("device_manufacturer_name",deviceManufacturerName);
-                                editor.putString("device_model_name",deviceModelName);
-                                editor.putString("control_app_package_name",controlAppPackageName);
-
-                                editor.apply();
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        loadingPd.dismiss();
-                                    }
-                                });
-
-                                F_start_ResidentService();
-
-
-                            }else {
-
-                                //選擇型號
-                                showSelectDeviceAlert(null, null);
-                            }
-
-                        }else{
-
-                            //選擇型號 帶入拿回來的型號
+                        }*/
+                        else {
+                            //選擇型號
+                            //showSelectDeviceAlert(null, null);
                             showSelectDeviceAlert(deviceModelId,controlAppPackageName);
                         }
 
+                    }else{
+                        //選擇型號 帶入拿回來的型號
+                        showSelectDeviceAlert(deviceModelId,controlAppPackageName);
                     }
-
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
 
-
-            });
-
-            thread.start();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
 
         }
@@ -702,12 +727,14 @@ public class MainActivity extends AppCompatActivity {
 
                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this,R.style.AlertDialogCustomColorBlue);
                 alertDialog.setTitle("請選擇電視型號");
+                alertDialog.setCancelable(false);
                 View layout = getLayoutInflater().inflate(R.layout.alert_select_divice_model,null);
                 alertDialog.setView(layout);
                 //alertDialog.setNegativeButton("取消",((dialog, which) -> {}));
                 alertDialog.setPositiveButton("確定",(((dialog, which) -> {})));
 
                 AlertDialog dialog = alertDialog.create();
+
                 dialog.setCanceledOnTouchOutside(false);
                 dialog.show();
 
@@ -894,7 +921,6 @@ public class MainActivity extends AppCompatActivity {
                                     String serverIp = UniversalFunction.GetServerIP(MainActivity.this);
                                     String controlAppPackageName = download_info.getString("controlAppPackageName");
 
-
                                     SharedPreferences pref = getSharedPreferences("mdm_ycnt", MODE_PRIVATE);
                                     SharedPreferences.Editor editor = pref.edit();
                                     editor.putString("device_manufacturer_name",deviceManufacturerName);
@@ -906,9 +932,6 @@ public class MainActivity extends AppCompatActivity {
                                     if(controlAppPackageName.equals("otherDevicePackageName")){
 
                                         F_start_ResidentService();
-                                        Log.e("deviceManufacturerName",deviceManufacturerName);
-                                        Log.e("deviceModelName",deviceModelName);
-                                        Log.e("controlAppPackageName",controlAppPackageName);
 
                                     }
                                     else{
