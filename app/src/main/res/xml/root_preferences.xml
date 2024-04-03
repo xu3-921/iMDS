@@ -1,9 +1,9 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/setting_common_header"
-        app:isPreferenceVisible="false"
+    <PreferenceCategory
+        app:key="preferenceCategoryCommon"
+        app:title="@string/setting_common_header"
         >
-
 
         <!--<EditTextPreference
             app:key="signature"
@@ -17,6 +17,14 @@
             app:key="reply"
             app:title="@string/reply_title"
             app:useSimpleSummaryProvider="true" />-->
+
+        <SwitchPreferenceCompat
+            app:key="setting_emergency_alert_btn"
+            app:defaultValue="true"
+            app:title="@string/setting_emergency_alert_btn_title"
+            app:summaryOff="@string/setting_summary_off"
+            app:summaryOn="@string/setting_summary_on"
+            />
 
         <SwitchPreferenceCompat
             app:key="setting_TimeSwitch_open"
@@ -88,6 +96,11 @@
             app:key="setting_app_version"
             app:title="@string/setting_app_version_title"
             app:summary="@string/versionName"/>
+
+        <Preference
+            app:key="setting_device_id_base64"
+            app:title="@string/setting_device_id_base64_title"
+            app:summary=""/>
 
         <!--<SwitchPreferenceCompat
             app:key="sync"

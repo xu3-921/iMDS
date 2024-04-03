@@ -32,11 +32,11 @@ public class ShowIptsQrCodeActivity extends AppCompatActivity {
         ImageView img_qrcode=findViewById(R.id.img_qrcode);
         TextView textView_showID=findViewById(R.id.textView_showID);
 
-        String deviceId = UniversalFunction.F_getDeviceId();
+        String deviceId = UniversalFunction.F_getDeviceId(this);
 
         textView_showID.setText(deviceId);
 
-        String url_domain = UniversalFunction.GetServerIP(getApplicationContext());
+        String url_domain = UniversalFunction.GetServerIP(ShowIptsQrCodeActivity.this);
 
         byte[] DeviceIdData = new byte[0];
 

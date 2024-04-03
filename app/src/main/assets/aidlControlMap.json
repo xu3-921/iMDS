@@ -1,0 +1,7 @@
+{
+  "com.ycnt.genetouch_v5_control":{
+    "serviceAction":"com.ycnt.genetouch_v5_control.IMDSControlInterfaceService.BIND",
+    "interfaceCanonicalName":"com.ycnt.genetouch_v5_control.IMDSControlInterface",
+    "supportVersion": 4
+  }
+}

@@ -3,21 +3,28 @@ package com.example.mdm_ycnt;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.example.mdm_ycnt.Function_Get_device_state.F_getLocalIpAddress;
+import static com.google.zxing.integration.android.IntentIntegrator.REQUEST_CODE;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -76,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
     String HttpPost_getManufacturerAndDeviceModelList = "php/app_php/mdm_get_manufacturer_device_model.php";
     String HttpPost_updateDeviceModelAndGetDownloadUrl = "php/app_php/mdm_update_device_model_and_get_download_url.php";
 
+    private final UniversalFunction universalFunction_instance = new UniversalFunction();
+
     private TimerTask task;
     private Timer timer;
     private ProgressDialog loadingPd;
@@ -87,52 +96,21 @@ public class MainActivity extends AppCompatActivity {
     boolean isFirstTimeOpen = true;
     boolean isToReload = false;
 
+    AlertDialog alertDialogHint = null;
+
 
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        boolean hasWriteExternalStorage = UniversalFunction.requestPermission(MainActivity.this , this, WRITE_EXTERNAL_STORAGE ,100);
-
-        //Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-        //startActivity(intent);
-
-        //Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-        //boolean hasOver = UniversalFunction.requestPermission(MainActivity.this , this, SYSTEM_ALERT_WINDOW ,100);
-
-        if(hasWriteExternalStorage){
-
-            if((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && !getPackageManager().canRequestPackageInstalls()){
-
-                createAlertDialogGetInstallPermission();
-
-            }
-            else if((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && !Settings.canDrawOverlays(MainActivity.this)){
-
-                createAlertDialogGetDrawOverlaysPermission();
-
-            }
-            else {
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        is_update_imds_app();
-
-                    }
-
-                }).start();
-
-            }
-        }
+        checkDevicePermissions();
 
     }
 
     private void is_update_imds_app(){
 
-        JSONObject getJson = UniversalFunction.check_imds_app_version();
+        JSONObject getJson = UniversalFunction.check_imds_app_version(MainActivity.this);
 
         try {
             String isLastVersion = null;
@@ -143,21 +121,22 @@ public class MainActivity extends AppCompatActivity {
                 isLastVersion = getJson.getString("is_last_version");
             }
 
-            //newest_ver:最新版
-            //safe_ver:安全範圍內 但不是最新
-            //higher_than_max_ver:版本過高
-            //lower_than_min_ver:版本過低
-            //unregistered:未註冊
-            //error:錯誤
+            // newest_ver:最新版
+            // safe_ver:安全範圍內 但不是最新
+            // higher_than_max_ver:版本過高
+            // lower_than_min_ver:版本過低
+            // unregistered:未註冊
+            // error:錯誤
+
 
             if(isLastVersion.equals("newest_ver") || isLastVersion.equals("unregistered") || isLastVersion.equals("error")){
 
-                /*runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        createMainActivity();
-                    }
-                });*/
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        createMainActivity();
+//                    }
+//                });
 
                 is_update_control_app();
 
@@ -201,17 +180,20 @@ public class MainActivity extends AppCompatActivity {
 
                             alertDialog.show();
 
+                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                            alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
+
                         }
                     });
 
                 }
                 else{
-                    /*runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            createMainActivity();
-                        }
-                    });*/
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            createMainActivity();
+//                        }
+//                    });
                     is_update_control_app();
                 }
 
@@ -251,6 +233,9 @@ public class MainActivity extends AppCompatActivity {
 
                         alertDialog.show();
 
+                        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                        alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
+
                     }
                 });
             }
@@ -263,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void is_update_control_app(){
 
-        JSONObject getJson = UniversalFunction.check_control_app_version();
+        JSONObject getJson = UniversalFunction.check_control_app_version(this);
 
         try {
 
@@ -350,11 +335,14 @@ public class MainActivity extends AppCompatActivity {
 
                         alertDialog.show();
 
+                        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                        alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
+
+
                     }
                 });
 
             }
-
 
 
         }catch (JSONException e){
@@ -375,6 +363,8 @@ public class MainActivity extends AppCompatActivity {
             TextView text_url = findViewById(R.id.text_url);
             TextView text_IP = findViewById(R.id.text_IP);
             TextView text_app_version = findViewById(R.id.text_app_version);
+            TextView text_device_name = findViewById(R.id.text_device_name);
+            TextView text_site_name = findViewById(R.id.text_site_name);
             ImageButton btn_setting = findViewById(R.id.btn_setting);
 
 
@@ -394,6 +384,16 @@ public class MainActivity extends AppCompatActivity {
             text_IP.setText("設備IP : "+F_getLocalIpAddress());
             text_app_version.setText("iMDS App版本 : "+BuildConfig.VERSION_NAME);
 
+            String deviceName = getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
+                    .getString("deviceName", "未知");
+
+            text_device_name.setText("設備名稱 : "+deviceName);
+
+            String siteName = getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
+                    .getString("siteName", "未知");
+
+            text_site_name.setText("站點名稱 : "+siteName);
+
 
             task = new TimerTask (){
                 public void run() {
@@ -411,6 +411,7 @@ public class MainActivity extends AppCompatActivity {
                     og_url_domain = og_url_domain.replace("伺服器網址 : ","");
 
                     if(!og_url_domain.equals(get_url_domain)){
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run(){
@@ -420,27 +421,85 @@ public class MainActivity extends AppCompatActivity {
 
                     }
 
+                    String deviceName = getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
+                            .getString("deviceName", "未知");
+
+                    String ogDeviceName =  text_device_name.getText().toString();
+                    ogDeviceName = ogDeviceName.replace("設備名稱 : ","");
+
+                    if(!ogDeviceName.equals(deviceName)){
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run(){
+                                text_device_name.setText("設備名稱 : "+deviceName);
+                            }
+                        });
+
+                    }
+
+                    String siteName = getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
+                            .getString("siteName", "未知");
+
+                    String ogSiteName =  text_device_name.getText().toString();
+                    ogSiteName = ogSiteName.replace("站點名稱 : ","");
+
+                    if(!ogSiteName.equals(siteName)){
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run(){
+                                text_site_name.setText("站點名稱 : "+siteName);
+                            }
+                        });
+
+                    }
+
                 }
             };
 
-            timer = new Timer();
-            timer.schedule(task, 0,1000 * 10);
+            try {
+                universalFunction_instance.isDeviceRegistered(this, new UniversalFunction.RegistrationCallback() {
+                    @Override
+                    public void onResult(boolean isRegistered) {
 
+                        if (isRegistered) {
 
-            new Thread(() -> {
+                            timer = new Timer();
+                            timer.schedule(task, 0,1000 * 10);
 
-                try {
-                    setDeviceControlMethodProcess();
+                            new Thread(() -> {
 
-                } catch (InterruptedException | JSONException e) {
-                    e.printStackTrace();
-                }
+                                try {
+                                    setDeviceControlMethodProcess();
 
-            }).start();
+                                } catch (InterruptedException | JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }).start();
+
+                        } else {
+
+                            SharedPreferences pref = getSharedPreferences("mdm_ycnt", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = pref.edit();
+                            editor.remove("isDeviceSignUp");
+                            editor.apply();
+
+                            F_reload_to_registered();
+                        }
+                    }
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
+                F_reload_to_registered();
+            }
+
 
 
         }
         else{//未註冊
+            
             setContentView(R.layout.activity_main);
 
             SharedPreferences pref = getSharedPreferences("mdm_ycnt", MODE_PRIVATE);
@@ -448,46 +507,56 @@ public class MainActivity extends AppCompatActivity {
 
             ImageView img_qrcode=findViewById(R.id.img_qrcode);
             TextView textView_showID=findViewById(R.id.textView_showID);
+            
+            new Thread(() -> {
 
-            String id = F_get_system_name();
+                String id = universalFunction_instance.F_get_system_name(this);
 
-            textView_showID.setText(id);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-            String url_domain = UniversalFunction.GetServerIP(getApplicationContext());
+                        textView_showID.setText(id);
+
+                        String url_domain = UniversalFunction.GetServerIP(MainActivity.this);
+
+                        byte[] DeviceIdData = new byte[0];
+                        try {
+                            DeviceIdData = id.getBytes("UTF-8");
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+                        String DeviceId_base64 = Base64.encodeToString(DeviceIdData, Base64.DEFAULT);
+
+                        String url = url_domain + "iMDS_Register/index.php?" + DeviceId_base64;//"get_device_qrcode.php?"
+                        UniversalFunction.F_show_qrcode(img_qrcode,url);
+
+                        task = new TimerTask (){
+                            public void run() {
+
+                                HttpPost_isSignUp(id);
+
+                            }
+                        };
+
+                        timer = new Timer();
+                        timer.schedule(task, 0,1000 * 5);
+
+                    }
+                });
 
 
-            byte[] DeviceIdData = new byte[0];
-            try {
-                DeviceIdData = id.getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            String DeviceId_base64 = Base64.encodeToString(DeviceIdData, Base64.DEFAULT);
+            }).start();
 
-
-            String url = url_domain + "iMDS_Register/index.php?" + DeviceId_base64;//"get_device_qrcode.php?"
-            UniversalFunction.F_show_qrcode(img_qrcode,url);
-
-
-            task = new TimerTask (){
-                public void run() {
-
-                    HttpPost_isSignUp(id);
-
-                }
-            };
-
-            timer = new Timer();
-            timer.schedule(task, 0,1000 * 5);
 
         }
+
     }
 
     @Override
     protected void onResume() {
 
         super.onResume();
-        //Log.e("ttt","onResume");
 
         if(isFirstTimeOpen){
             isFirstTimeOpen = false;
@@ -506,17 +575,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-
-        //Log.e("tttt","onPause");
+        cancelTimer();
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
-
-        //Log.e("tttt","onDestroy");
         super.onDestroy();
 
+        if (alertDialogHint != null && alertDialogHint.isShowing()) {
+            alertDialogHint.dismiss();
+        }
     }
 
 
@@ -526,7 +595,7 @@ public class MainActivity extends AppCompatActivity {
         String control_app_package_name = getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
                                         .getString("control_app_package_name", null);
 
-        JSONObject getDeviceModelVal = HttpPost_getDeviceModelInfo(F_get_system_name());
+        JSONObject getDeviceModelVal = HttpPost_getDeviceModelInfo(universalFunction_instance.F_get_system_name(this));
 
         String controlAppPackageName = getDeviceModelVal.getString("ad_mdm_device_control_app_package_name");
 
@@ -558,7 +627,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             }else{
-                boolean hasInstalledControlApp = UniversalFunction.hasInstalledThisApp(controlAppPackageName);
+                boolean hasInstalledControlApp = UniversalFunction.hasInstalledThisApp(controlAppPackageName, MainActivity.this);
 
                 isSuccessEnter = hasInstalledControlApp;
 
@@ -725,7 +794,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run(){
 
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this,R.style.AlertDialogCustomColorBlue);
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this,
+                        R.style.AlertDialogCustomColorBlue);
                 alertDialog.setTitle("請選擇電視型號");
                 alertDialog.setCancelable(false);
                 View layout = getLayoutInflater().inflate(R.layout.alert_select_divice_model,null);
@@ -737,6 +807,8 @@ public class MainActivity extends AppCompatActivity {
 
                 dialog.setCanceledOnTouchOutside(false);
                 dialog.show();
+
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
 
                 AutoCompleteTextView textViewDeviceManufacturer;
                 AutoCompleteTextView textViewDeviceModel;
@@ -936,7 +1008,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                     else{
 
-                                        boolean hasInstalledApp = UniversalFunction.hasInstalledThisApp(controlAppPackageName);
+                                        boolean hasInstalledApp = UniversalFunction.hasInstalledThisApp(controlAppPackageName, MainActivity.this);
 
                                         //int getAppVersionCode = UniversalFunction.getAppVersionCode(packageName);
                                         if(!hasInstalledApp){
@@ -979,115 +1051,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-
-
-
-    //生成device_id
-    public String F_get_system_name(){
-        //md5("d"+"9"+"2"+$android_id+"e")
-        String DeviceId = null;
-        String device_id= getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
-                            .getString("device_id", "noID");
-
-        if(!device_id.equals("noID")){
-            return device_id;
-
-        }else{
-
-            if(Build.VERSION.SDK_INT < 29){//低於android 10
-
-                if(!getMacAddr_wlan0().equals("not_get_mac")){
-                    DeviceId=getMacAddr_wlan0().replace(":","");
-
-                }else if(!getMacAddr_eth0().equals("not_get_mac")){
-                    DeviceId=getMacAddr_eth0().replace(":","");
-
-                }else{
-                    DeviceId=Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-
-                }
-
-            }else{
-                DeviceId=Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-
-            }
-
-            String md5_DeviceId = F_md5(DeviceId);
-
-            return md5_DeviceId;
-
-        }
-
-
-    }
-
-    //md5加密
-    public static String F_md5(String device_id){
-
-        String id="d"+"9"+"2"+device_id+"e";
-
-        byte[] hash;
-        try {
-            hash = MessageDigest.getInstance("MD5").digest(id.getBytes("UTF-8"));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("NoSuchAlgorithmException",e);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("UnsupportedEncodingException", e);
-        }
-
-        StringBuilder hex = new StringBuilder(hash.length * 2);
-        for (byte b : hash) {
-            if ((b & 0xFF) < 0x10){
-                hex.append("0");
-            }
-            hex.append(Integer.toHexString(b & 0xFF));
-        }
-        return hex.toString();
-    }
-
-    //getMacAddress_eth0
-    public static String getMacAddr_eth0() {
-        String Mac=null;
-        try{
-            String path="sys/class/net/eth0/address";
-            FileInputStream fis_name = new FileInputStream(path);
-            byte[] buffer_name = new byte[8192];
-            int byteCount_name = fis_name.read(buffer_name);
-            if(byteCount_name>0)
-            {
-                Mac = new String(buffer_name, 0, byteCount_name, "utf-8");
-            }
-            if(Mac.length()==0||Mac==null){
-                return "not_get_mac";
-            }
-        }catch(Exception io){
-            return "not_get_mac";
-        }
-        return Mac.trim().toUpperCase();
-    }
-
-    //getMacAddress_wlan0
-    private static String getMacAddr_wlan0() {
-        String Mac=null;
-        try{
-            String path="sys/class/net/wlan0/address";
-            FileInputStream fis_name = new FileInputStream(path);
-            byte[] buffer_name = new byte[8192];
-            int byteCount_name = fis_name.read(buffer_name);
-            if(byteCount_name>0)
-            {
-                Mac = new String(buffer_name, 0, byteCount_name, "utf-8");
-            }
-            if(Mac.length()==0||Mac==null){
-                return "not_get_mac";
-            }
-        }catch(Exception io){
-            return "not_get_mac";
-        }
-        return Mac.trim().toUpperCase();
-    }
-
     private void HttpPost_isSignUp(String device_id){
 
         new Thread(new Runnable() {
@@ -1102,16 +1065,21 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     String url_domain = UniversalFunction.GetServerIP(MainActivity.this);
 
-                    String phpUrl = url_domain+HttpPost_isSignUP_url;
+                    String phpUrl = url_domain + HttpPost_isSignUP_url;
                     URL url = new URL(phpUrl);
+
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("id", device_id);
+                    jsonObject.put("ip", Function_Get_device_state.F_getLocalIpAddress());
+                    jsonObject.put("eth0", Function_Get_device_state.F_getLocalMacAddress_eth0());
+                    jsonObject.put("wlan0", Function_Get_device_state.F_getLocalMacAddress_wlan0());
+
 
                     String message = jsonObject.toString();
 
                     conn = (HttpURLConnection) url.openConnection();
-                    conn.setReadTimeout(10000); //milliseconds
-                    conn.setConnectTimeout(15000); //milliseconds
+                    conn.setReadTimeout(10000);
+                    conn.setConnectTimeout(15000);
                     conn.setRequestMethod("POST");
                     conn.setDoInput(true);
                     conn.setDoOutput(true);
@@ -1236,7 +1204,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
 
-            String url_domain = UniversalFunction.GetServerIP(getApplicationContext());
+            String url_domain = UniversalFunction.GetServerIP(MainActivity.this);
 
             String phpUrl = url_domain + HttpPost_device_model_url;
 
@@ -1323,7 +1291,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
 
-            String url_domain = UniversalFunction.GetServerIP(getApplicationContext());
+            String url_domain = UniversalFunction.GetServerIP(MainActivity.this);
 
             String phpUrl = url_domain + HttpPost_getManufacturerAndDeviceModelList;
 
@@ -1407,13 +1375,13 @@ public class MainActivity extends AppCompatActivity {
 
         try {
 
-            String url_domain = UniversalFunction.GetServerIP(getApplicationContext());
+            String url_domain = UniversalFunction.GetServerIP(MainActivity.this);
 
             String phpUrl = url_domain + HttpPost_updateDeviceModelAndGetDownloadUrl;
 
             URL url = new URL(phpUrl);
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("id", F_get_system_name());
+            jsonObject.put("id", universalFunction_instance.F_get_system_name(this));
             jsonObject.put("device_model", deviceModel);
 
             String message = jsonObject.toString();
@@ -1513,7 +1481,7 @@ public class MainActivity extends AppCompatActivity {
                     //是 - download
                     //否 - 拿權限
 
-                    if((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && !getPackageManager().canRequestPackageInstalls()){
+                    if(!getPackageManager().canRequestPackageInstalls()){
 
                         createAlertDialogGetInstallPermission();
 
@@ -1558,6 +1526,9 @@ public class MainActivity extends AppCompatActivity {
                 alertDialog.setCanceledOnTouchOutside(false);
                 alertDialog.show();
 
+                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
+
 
             }
         });
@@ -1579,10 +1550,14 @@ public class MainActivity extends AppCompatActivity {
 
             }else{
 
-                runOnUiThread(new Runnable() {
+                MainActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        AlertDialog.Builder alertDialogBuilderHint = new AlertDialog.Builder(MainActivity.this,R.style.BlueThemeDialog);
+
+
+
+                        AlertDialog.Builder alertDialogBuilderHint =
+                                new AlertDialog.Builder(MainActivity.this,R.style.BlueThemeDialog);
                         alertDialogBuilderHint.setTitle("無法取得存取裝置的權限");
                         alertDialogBuilderHint.setMessage("沒有存取裝置的權限將無法使用iMDS");
 
@@ -1590,53 +1565,24 @@ public class MainActivity extends AppCompatActivity {
                             finish();
                         }));
                         alertDialogBuilderHint.setPositiveButton("允許",((dialog, which) -> {
-                            UniversalFunction.requestPermission(MainActivity.this ,MainActivity.this ,permissions[0] ,requestCode);
+                            UniversalFunction.requestPermission(
+                                    MainActivity.this ,MainActivity.this ,permissions[0] ,requestCode);
+
                         }));
 
-                        AlertDialog alertDialogHint = alertDialogBuilderHint.create();
+                        alertDialogHint = alertDialogBuilderHint.create();
                         alertDialogHint.setCancelable(false);
                         alertDialogHint.setCanceledOnTouchOutside(false);
                         alertDialogHint.show();
+
+                        alertDialogHint.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                        alertDialogHint.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
 
                     }
                 });
             }
 
         }
-
-        /*if (requestCode == 0) {
-
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //Log.e("tttaaa","1");
-
-                if (!Settings.canDrawOverlays(MainActivity.this) && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)) {
-                    GetOverlayPermission(true);
-
-                }else if((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && !getPackageManager().canRequestPackageInstalls()){
-                    GetInstallPermission();
-
-                } else {
-                    StartMainActivity();
-
-                }
-
-            }else{
-                //Log.e("tttaaa","0");
-
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(this,R.style.BlueThemeDialog);
-                alertDialog.setTitle("提示");
-                alertDialog.setMessage("無法取得存儲權限，請先至設定中賦予");
-                alertDialog.setPositiveButton(("去設定"),(((dialog, which) -> {
-                    dialog.dismiss();
-                    finish();
-                })));
-
-                AlertDialog alert = alertDialog.create();
-                alert.setCancelable(false);
-                alert.setCanceledOnTouchOutside(false);
-                alert.show();
-            }
-        }*/
 
     }
 
@@ -1648,33 +1594,45 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode){
 
             case 1:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-                    if(!getPackageManager().canRequestPackageInstalls()){ //沒有權限
+                if(!getPackageManager().canRequestPackageInstalls()){ //沒有權限
 
-                        createAlertDialogGetInstallPermission();
+                    createAlertDialogGetInstallPermission();
 
-                    }else{
-                        F_reload_to_registered();
-
-                    }
+                }else{
+                    F_reload_to_registered();
 
                 }
+
                 break;
 
             case 2:
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if(!Settings.canDrawOverlays(this)){ //沒有權限
+                    createAlertDialogGetDrawOverlaysPermission();
 
-                    if(!Settings.canDrawOverlays(this)){ //沒有權限
-                        createAlertDialogGetDrawOverlaysPermission();
-
-                    }else{
-                        F_reload_to_registered();
-
-                    }
+                }else{
+                    F_reload_to_registered();
 
                 }
+
+                break;
+
+            case 3:
+
+                boolean hasAllFilesAccessPermission = getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
+                                                    .getBoolean("hasAllFilesAccessPermission", true);
+
+                if(hasAllFilesAccessPermission
+                        && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                        && !Environment.isExternalStorageManager()){ //沒有權限
+
+                    createAlertDialogGetAllFilesAccessPermission();
+
+                }else{
+                    F_reload_to_registered();
+                }
+
                 break;
 
         }
@@ -1685,9 +1643,10 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                AlertDialog.Builder alertDialogBuilderHint = new AlertDialog.Builder(MainActivity.this,R.style.BlueThemeDialog);
-                alertDialogBuilderHint.setTitle("請允許安裝權限");
-                alertDialogBuilderHint.setMessage("沒有安裝權限將無法使用iMDS");
+                AlertDialog.Builder alertDialogBuilderHint =
+                        new AlertDialog.Builder(MainActivity.this,R.style.BlueThemeDialog);
+                alertDialogBuilderHint.setTitle("請允許iMDS安裝APP的權限");
+                alertDialogBuilderHint.setMessage("沒有此權限iMDS將無法使用");
 
                 alertDialogBuilderHint.setNegativeButton("退出",((dialog, which) -> {
                     finish();
@@ -1696,11 +1655,14 @@ public class MainActivity extends AppCompatActivity {
                     UniversalFunction.getInstallPermission(MainActivity.this ,MainActivity.this);
                 }));
 
-                AlertDialog alertDialogHint = alertDialogBuilderHint.create();
+                alertDialogHint = alertDialogBuilderHint.create();
                 alertDialogHint.setCancelable(false);
                 alertDialogHint.setCanceledOnTouchOutside(false);
 
                 alertDialogHint.show();
+
+                alertDialogHint.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                alertDialogHint.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
             }
         });
 
@@ -1711,9 +1673,10 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                AlertDialog.Builder alertDialogBuilderHint = new AlertDialog.Builder(MainActivity.this,R.style.BlueThemeDialog);
-                alertDialogBuilderHint.setTitle("請允許懸浮視窗權限");
-                alertDialogBuilderHint.setMessage("沒有懸浮視窗權限將無法使用iMDS");
+                AlertDialog.Builder alertDialogBuilderHint =
+                        new AlertDialog.Builder(MainActivity.this,R.style.BlueThemeDialog);
+                alertDialogBuilderHint.setTitle("請允許iMDS懸浮視窗的權限");
+                alertDialogBuilderHint.setMessage("沒有此權限iMDS將無法使用");
 
                 alertDialogBuilderHint.setNegativeButton("退出",((dialog, which) -> {
                     finish();
@@ -1722,32 +1685,116 @@ public class MainActivity extends AppCompatActivity {
                     UniversalFunction.getOverlayPermission(MainActivity.this ,MainActivity.this);
                 }));
 
-                AlertDialog alertDialogHint = alertDialogBuilderHint.create();
+                alertDialogHint = alertDialogBuilderHint.create();
                 alertDialogHint.setCancelable(false);
                 alertDialogHint.setCanceledOnTouchOutside(false);
 
                 alertDialogHint.show();
+
+                alertDialogHint.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                alertDialogHint.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
             }
         });
+
+    }
+
+    private void createAlertDialogGetAllFilesAccessPermission(){
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder alertDialogBuilderHint =
+                        new AlertDialog.Builder(MainActivity.this,R.style.BlueThemeDialog);
+                alertDialogBuilderHint.setTitle("請允許iMDS存取所有的檔案");
+                alertDialogBuilderHint.setMessage("沒有此權限iMDS將無法使用");
+
+                alertDialogBuilderHint.setNegativeButton("退出",((dialog, which) -> {
+                    finish();
+                }));
+                alertDialogBuilderHint.setPositiveButton("允許",((dialog, which) -> {
+
+                    try {
+
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                        //startActivity(intent);
+                        startActivityForResult(intent, 3);
+
+                    }catch (Exception e){
+                        e.printStackTrace();
+
+                        SharedPreferences pref = getSharedPreferences("mdm_ycnt", MODE_PRIVATE);
+                        pref.edit().putBoolean("hasAllFilesAccessPermission", false).apply();
+
+                        F_reload_to_registered();
+                    }
+
+                }));
+
+                alertDialogHint = alertDialogBuilderHint.create();
+                alertDialogHint.setCancelable(false);
+                alertDialogHint.setCanceledOnTouchOutside(false);
+
+                alertDialogHint.show();
+
+                alertDialogHint.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                alertDialogHint.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
+            }
+        });
+
+    }
+
+    private void checkDevicePermissions(){
+
+        boolean hasWriteExternalStorage = UniversalFunction.requestPermission(
+                MainActivity.this , this, WRITE_EXTERNAL_STORAGE ,100);
+
+        boolean hasAllFilesAccessPermission = getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
+                                            .getBoolean("hasAllFilesAccessPermission", true);
+
+        if(hasWriteExternalStorage){
+
+            if(!getPackageManager().canRequestPackageInstalls()){
+
+                createAlertDialogGetInstallPermission();
+
+            }
+            else if(!Settings.canDrawOverlays(MainActivity.this)){
+
+                createAlertDialogGetDrawOverlaysPermission();
+
+            }
+            else if(hasAllFilesAccessPermission
+                    && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                    && !Environment.isExternalStorageManager()){
+
+                createAlertDialogGetAllFilesAccessPermission();
+
+            }
+            else {
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        is_update_imds_app();
+
+                    }
+
+                }).start();
+
+            }
+        }
 
     }
 
     private void F_start_ResidentService(){
 
         //啟動服務
-        if(!(UniversalFunction.isServiceRunning(getApplicationContext(),"com.example.mdm_ycnt.ResidentService"))){
-            Intent service = new Intent(getApplicationContext(),ResidentService.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                getApplicationContext().startForegroundService(service);
-            }else {
-                getApplicationContext().startService(service);
-            }
+        if(!(UniversalFunction.isServiceRunning(
+                MainActivity.this,"com.example.mdm_ycnt.ResidentService"))){
+
+            Intent service = new Intent(MainActivity.this,ResidentService.class);
+            MainActivity.this.startForegroundService(service);
         }
     }
-
-
-
-
-
-
 }

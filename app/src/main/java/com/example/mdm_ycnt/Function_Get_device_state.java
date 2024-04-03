@@ -1,12 +1,14 @@
 package com.example.mdm_ycnt;
 
-import static android.security.KeyStore.getApplicationContext;
+import static android.content.Context.MODE_PRIVATE;
 
 import static java.lang.String.format;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiInfo;
@@ -129,7 +131,7 @@ public class Function_Get_device_state {
 
         }catch(Exception e){
             Mac= "error_wlan0";
-            e.printStackTrace();
+            //e.printStackTrace();
 
         }finally {
             try {
@@ -165,7 +167,7 @@ public class Function_Get_device_state {
             }
         }catch(Exception e){
             Mac= "error_eth0";
-            e.printStackTrace();
+            //e.printStackTrace();
         }finally {
             try {
                 if (fis_name!=null){
@@ -196,10 +198,10 @@ public class Function_Get_device_state {
         return null;
     }
 
-    public static String F_getDHCPstatus(){
+    public static String F_getDHCPstatus(Context mContext){
         String str=null;
         try {
-            WifiManager wifiManager = (WifiManager) getApplicationContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
             WifiInfo info = wifiManager.getConnectionInfo();
             if(null!=wifiManager){
                 DhcpInfo dhcpInfo = wifiManager.getDhcpInfo();
@@ -235,8 +237,8 @@ public class Function_Get_device_state {
                 + (0xFF & paramInt >> 24);
     }
 
-    public static String F_get_TimeSwitchPower_state(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    public static String F_get_TimeSwitchPower_state(Context mContext){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         Boolean TimeSwitch_open = prefs.getBoolean("setting_TimeSwitch_open", false);
         Boolean TimeSwitch_close = prefs.getBoolean("setting_TimeSwitch_close", false);
 
@@ -254,8 +256,8 @@ public class Function_Get_device_state {
         return isTimeSwitch;
     }
 
-    public static String F_get_volume(){
-        AudioManager mAudioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+    public static String F_get_volume(Context mContext){
+        AudioManager mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
 
         float MaxVolume=mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         float Volume=mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -263,16 +265,40 @@ public class Function_Get_device_state {
         return format("%.01f", Volume / MaxVolume * 100);
     }
 
-    public static String F_get_deviceName(){
-        String name = Settings.Global.getString(getApplicationContext().getContentResolver(), Settings.Global.DEVICE_NAME);
+    public static String F_get_deviceName(Context mContext){
+        String name = Settings.Global.getString(mContext.getContentResolver(), Settings.Global.DEVICE_NAME);
         return name;
+
+    }
+
+    public String getControlAppVersion(Context mContext){
+
+        String G_control_app_package_name = mContext.getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
+                .getString("control_app_package_name", "no_val");
+
+        if(!G_control_app_package_name.equals("no_val")){
+            try {
+
+            PackageManager pm = mContext.getPackageManager();
+                PackageInfo pInfo = pm.getPackageInfo(G_control_app_package_name, 0);
+                String version = pInfo.versionName;
+
+                return version;
+
+            } catch (PackageManager.NameNotFoundException e) {
+                return null;
+            }
+
+        }else {
+            return null;
+        }
 
     }
 
 
     //30秒一次
-    /*Log.e("ttt","全部的RAM:"+ F_getTotalRAM(getApplicationContext()));
-      Log.e("ttt","未使用的RAM:"+ F_getAvailableRAM(getApplicationContext()));
+    /*Log.e("ttt","全部的RAM:"+ F_getTotalRAM());
+      Log.e("ttt","未使用的RAM:"+ F_getAvailableRAM());s
       //Log.e("ttt", "開機累計時間:"+F_getOpenTime());
 
       //開起來第一次

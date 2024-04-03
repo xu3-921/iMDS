@@ -41,8 +41,12 @@
     <string name="setting_iPTS_control_qr_code_title">iPTS控制</string>
     <string name="setting_iPTS_control_qr_code_summary">透過iPTS控制</string>
 
+    <string name="setting_device_id_base64_title">設備序號</string>
+
+    <string name="setting_emergency_alert_btn_title">緊急通報按鈕</string>
+
 
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
-    <!--<string name="mdm_default_url">http://192.168.89.140/mdm/</string>-->
-    <string name="mdm_default_url">http://icast.tw/mdm/</string>
+<!--    <string name="mdm_default_url">http://icast.tw/mdm/</string>-->
+    <string name="mdm_default_url">http://imds.tw/mdm/</string>
 </resources>

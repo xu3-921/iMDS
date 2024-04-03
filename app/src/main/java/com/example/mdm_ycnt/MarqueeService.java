@@ -95,11 +95,11 @@ public class MarqueeService extends Service {
                 public void run() {
 
                     try {
-                        Log.e("testGetTime","startSleep");
+                        //Log.e("testGetTime","startSleep");
 
                         Thread.sleep(silentBroadcastDurationTime * 1000);
 
-                        Log.e("testGetTime","end");
+                        //Log.e("testGetTime","end");
 
                         stopSelf();
 

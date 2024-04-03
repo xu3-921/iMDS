@@ -14,9 +14,12 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SwitchPreferenceCompat;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Base64;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -84,17 +87,21 @@ public class SettingsActivity extends AppCompatActivity {
                 setting_control_app_version.setVisible(false);
             }
             else{
-                String appVersion = UniversalFunction.getAppVersionName(controlAppVersion);
+                String appVersion = UniversalFunction.getAppVersionName(controlAppVersion, getContext());
                 setting_control_app_version.setSummary(appVersion);
             }
 
+            Preference setting_device_id_base64 = findPreference("setting_device_id_base64");
+
+            String getDeviceId = UniversalFunction.F_getDeviceId(getContext());
+            String encodedString = Base64.getEncoder().encodeToString(getDeviceId.getBytes());
+            setting_device_id_base64.setSummary(encodedString);
 
 
             Preference setting_iPTS_control_qr_code = findPreference("setting_iPTS_control_qr_code");
             setting_iPTS_control_qr_code.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-
 
                     Intent intent = new Intent(activity, ShowIptsQrCodeActivity.class);
                     startActivity(intent);
@@ -125,7 +132,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                                 String isLastVersion = null;
 
-                                JSONObject getJson = UniversalFunction.check_imds_app_version();
+                                JSONObject getJson = UniversalFunction.check_imds_app_version(getContext());
 
 
                                 if(getJson == null){
@@ -152,7 +159,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                                             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
                                             alertDialogBuilder.setTitle("iMDS為最新版本");
-                                            alertDialogBuilder.setMessage("iMDS無須更新");
+                                            //alertDialogBuilder.setMessage("iMDS無須更新");
 
                                             alertDialogBuilder.setPositiveButton("完成",((dialog, which) -> {}));
 
@@ -161,6 +168,9 @@ public class SettingsActivity extends AppCompatActivity {
                                             alertDialog.setCanceledOnTouchOutside(false);
 
                                             alertDialog.show();
+
+                                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                                            alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
 
 
                                         }
@@ -185,6 +195,9 @@ public class SettingsActivity extends AppCompatActivity {
                                             alertDialog.setCanceledOnTouchOutside(false);
 
                                             alertDialog.show();
+
+                                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                                            alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
 
 
                                         }
@@ -253,6 +266,9 @@ public class SettingsActivity extends AppCompatActivity {
 
                                             alertDialog.show();
 
+                                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                                            alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
+
                                         }
                                     });
                                 }
@@ -295,7 +311,7 @@ public class SettingsActivity extends AppCompatActivity {
                             //lower_than_min_ver:版本過低
                             //error:錯誤
 
-                            JSONObject getJson = UniversalFunction.check_control_app_version();
+                            JSONObject getJson = UniversalFunction.check_control_app_version(getContext());
 
                             try {
 
@@ -318,7 +334,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                                             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
                                             alertDialogBuilder.setTitle("APP為最新版本");
-                                            alertDialogBuilder.setMessage("APP無須更新");
+                                            //alertDialogBuilder.setMessage("APP無須更新");
 
                                             alertDialogBuilder.setPositiveButton("完成",((dialog, which) -> {}));
 
@@ -327,6 +343,9 @@ public class SettingsActivity extends AppCompatActivity {
                                             alertDialog.setCanceledOnTouchOutside(false);
 
                                             alertDialog.show();
+
+                                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                                            alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
 
                                         }
                                     });
@@ -349,6 +368,9 @@ public class SettingsActivity extends AppCompatActivity {
                                             alertDialog.setCanceledOnTouchOutside(false);
 
                                             alertDialog.show();
+
+                                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                                            alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
 
                                         }
                                     });
@@ -416,6 +438,9 @@ public class SettingsActivity extends AppCompatActivity {
 
                                             alertDialog.show();
 
+                                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                                            alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
+
                                         }
                                     });
 
@@ -430,16 +455,39 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     }).start();
 
-
-
-
                     return false;
                 }
             });
 
+            Preference setting_emergency_alert_btn = findPreference("setting_emergency_alert_btn");
+            if (setting_emergency_alert_btn instanceof SwitchPreferenceCompat) {
+                SwitchPreferenceCompat switchPref = (SwitchPreferenceCompat) setting_emergency_alert_btn;
+                switchPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        boolean isSwitchOn = (Boolean) newValue;
 
+                        Intent intent = new Intent(getContext(), EmergencyAlertService.class);
 
+                        if(isSwitchOn) {
+                            intent.putExtra("action", "create");
+                        } else {
+                            intent.putExtra("action", "delete");
+                        }
 
+                        getContext().startService(intent);
+                        return true; // 返回 true 以保存變更
+                    }
+                });
+            }
+
+            boolean isEmergencyAlertBtnOn = getContext().getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
+                    .getBoolean("isEmergencyAlertBtnOn", false);
+            if(!isEmergencyAlertBtnOn){
+                Preference preferenceCategoryCommon = findPreference("preferenceCategoryCommon");
+                preferenceCategoryCommon.setVisible(false);
+                setting_emergency_alert_btn.setVisible(false);
+            }
 
         }
     }
