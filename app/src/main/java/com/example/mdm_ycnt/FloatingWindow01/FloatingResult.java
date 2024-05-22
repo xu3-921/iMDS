@@ -1,12 +1,12 @@
-package com.example.mdm_ycnt.FloatingWindow;
+package com.example.mdm_ycnt.FloatingWindow01;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 
-import com.example.mdm_ycnt.FloatingWindow.callback.FloatingListener;
-import com.example.mdm_ycnt.FloatingWindow.component.FloatingComponent;
-import com.example.mdm_ycnt.FloatingWindow.service.FloatingService;
+import com.example.mdm_ycnt.FloatingWindow01.callback.FloatingListener;
+import com.example.mdm_ycnt.FloatingWindow01.component.FloatingComponent;
+import com.example.mdm_ycnt.FloatingWindow01.service.FloatingService;
 
 /**
  * Author: Hamed Taherpour

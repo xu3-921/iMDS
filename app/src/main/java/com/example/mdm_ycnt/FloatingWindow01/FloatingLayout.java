@@ -1,4 +1,4 @@
-package com.example.mdm_ycnt.FloatingWindow;
+package com.example.mdm_ycnt.FloatingWindow01;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,8 +7,8 @@ import android.os.Looper;
 
 import androidx.annotation.LayoutRes;
 
-import com.example.mdm_ycnt.FloatingWindow.callback.FloatingListener;
-import com.example.mdm_ycnt.FloatingWindow.service.FloatingService;
+import com.example.mdm_ycnt.FloatingWindow01.callback.FloatingListener;
+import com.example.mdm_ycnt.FloatingWindow01.service.FloatingService;
 
 /**
  * Author: Hamed Taherpour

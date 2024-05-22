@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true" android:drawable="@drawable/rounded_corners_pressed"/> <!-- 按下状态 -->
-    <item android:drawable="@drawable/rounded_corners"/> <!-- 默认状态 -->
+    <item android:state_pressed="true" android:drawable="@drawable/rounded_corners_pressed"/> <!-- 按下狀態 -->
+    <item android:drawable="@drawable/rounded_corners"/> <!-- 默認狀態 -->
 </selector>

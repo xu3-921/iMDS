@@ -1,4 +1,4 @@
-package com.example.mdm_ycnt.FloatingWindow.service;
+package com.example.mdm_ycnt.FloatingWindow01.service;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
@@ -9,7 +9,7 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import com.example.mdm_ycnt.FloatingWindow.component.FloatingComponent;
+import com.example.mdm_ycnt.FloatingWindow01.component.FloatingComponent;
 
 /**
  * Author: Hamed Taherpour

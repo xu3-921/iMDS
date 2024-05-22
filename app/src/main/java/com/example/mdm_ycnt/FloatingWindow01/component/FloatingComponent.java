@@ -1,12 +1,12 @@
-package com.example.mdm_ycnt.FloatingWindow.component;
+package com.example.mdm_ycnt.FloatingWindow01.component;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.view.View;
 
-import com.example.mdm_ycnt.FloatingWindow.module.FloatingViewMovementModule;
-import com.example.mdm_ycnt.FloatingWindow.module.FloatingWindowModule;
+import com.example.mdm_ycnt.FloatingWindow01.module.FloatingViewMovementModule;
+import com.example.mdm_ycnt.FloatingWindow01.module.FloatingWindowModule;
 
 /**
  * Author: Hamed Taherpour

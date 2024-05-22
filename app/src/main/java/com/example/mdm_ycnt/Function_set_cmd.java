@@ -34,12 +34,6 @@ import java.time.format.DateTimeFormatter;
 
 public class Function_set_cmd {
 
-
-
-    // String getText = getJson.optString("text");
-    // getText = (getText != null && !getText.isEmpty()) ? getText : "55";
-
-
     int defaultTime = 180;
 
     /**
@@ -119,56 +113,16 @@ public class Function_set_cmd {
 
     }
 
-//    public void F_set_marquee(String value, Context mContext){
-//
-//        try {
-//            JSONObject getJson = new JSONObject(value);
-//
-//            String textVal = getJson.getString("text");
-//            textVal = textVal.replaceAll("\\R", "  ");
-//
-//            int durationTime = getJson.getInt("time");
-//
-//
-//
-//            SharedPreferences pref = mContext.getSharedPreferences("mdm_ycnt", MODE_PRIVATE);
-//            SharedPreferences.Editor editor = pref.edit();
-//
-//            editor.putString("silentBroadcastType","text");
-//            editor.putString("silentBroadcastInfo",textVal);
-//            editor.putInt("silentBroadcastDurationTime",durationTime);
-//
-//            editor.apply();
-//
-//
-//            Intent service = new Intent(mContext,MarqueeService.class);
-//            if((UniversalFunction.isServiceRunning(mContext,"com.example.mdm_ycnt.MarqueeService"))){
-//
-//                mContext.stopService(service);
-//            }
-//
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                mContext.startForegroundService(service);
-//            } else {
-//                mContext.startService(service);
-//            }
-//
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
-
-//    public void F_set_marquee_stop(Context mContext){
-//
-//        Intent service = new Intent(mContext,MarqueeService.class);
-//        if((UniversalFunction.isServiceRunning(mContext,"com.example.mdm_ycnt.MarqueeService"))){
-//
-//            mContext.stopService(service);
-//        }
-//
-//    }
-
+    /**
+     *
+     * iMDS 使用瀏覽器開啟一個指定的URL
+     *
+     * @param getValue webUrl
+     * @param mContext Context
+     *
+     * @author J Lee
+     * @since 1.0.6
+     */
     public void F_set_open_web(String getValue, Context mContext){
 
         try {
@@ -354,7 +308,6 @@ public class Function_set_cmd {
     //1.0.6
     public void F_stop_floating_window(String getValue, Context mContext){
 
-
         try {
             JSONObject getJson = null;
             getJson = new JSONObject(getValue);
@@ -387,6 +340,7 @@ public class Function_set_cmd {
             F_download_and_install_apk(apkUrl, componentsType, componentsName, packageName, mContext);
 
         } catch (JSONException e) {
+            Log.e("test09","testERR");
             e.printStackTrace();
         }
 
@@ -438,7 +392,7 @@ public class Function_set_cmd {
 //                    , mContext);
 
         } catch (InterruptedException | JSONException e) {
-
+            Log.e("test09","testERR02");
             e.printStackTrace();
 
         }

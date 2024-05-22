@@ -1,27 +1,18 @@
 package com.example.mdm_ycnt;
 
-import static com.example.mdm_ycnt.FloatingWindow.service.FloatingService.view;
-
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
-import android.media.AudioAttributes;
-import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.text.TextPaint;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,7 +31,6 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,7 +78,7 @@ public class FloatingWindowService extends Service {
 
                 addWebView(viewId, intent);
 
-            } else if ("silentBroadcast".equals(windowType)) {
+            }else if ("silentBroadcast".equals(windowType)) {
 
                 addSilentBroadcastWindow(viewId, intent);
 
@@ -97,6 +87,11 @@ public class FloatingWindowService extends Service {
                 addImageView(viewId, intent);
 
             }
+//            else if ("text".equals(windowType)) {
+//
+//                addTextView(viewId, intent);
+//
+//            }
 
             Object data = Singleton.getInstance().getSingletonData();
             if (data instanceof ArrayList<?>) {
@@ -369,6 +364,114 @@ public class FloatingWindowService extends Service {
 
     }
 
+//    private void addTextView(int viewId, Intent intent){
+//
+//        //螢幕寬度（px）
+////        DisplayMetrics displayMetrics = new DisplayMetrics();
+////        WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+////        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+//
+//        String textInfo = intent.getStringExtra("textInfo");
+////        int time = intent.getIntExtra("time",180);
+//
+//        String backgroundColor = intent.getStringExtra("backgroundColor") != null ?
+//                intent.getStringExtra("backgroundColor") : "#000000";
+//
+//        String textColor = intent.getStringExtra("textColor") != null ?
+//                intent.getStringExtra("textColor") : "#FFFFFF";
+//
+//        int textSize = intent.getIntExtra("textSize",35);
+////
+////        String setPosition = intent.getStringExtra("setPosition") != null ?
+////                intent.getStringExtra("setPosition") : "top";
+////
+//        int gravity = Gravity.START | Gravity.TOP;
+////
+////        if(setPosition.equals("center")){
+////            gravity = Gravity.START | Gravity.CENTER;
+////        }else if(setPosition.equals("bottom")){
+////            gravity = Gravity.START | Gravity.BOTTOM;
+////        }
+//
+//        String mediaType = intent.getStringExtra("mediaType");
+//        ArrayList<Integer> currentMediaList = checkMediaPlayingNum(mediaType);
+//
+//
+//        int width = -2;
+//        int height = -2;
+//
+//        RelativeLayout layout = new RelativeLayout(this);
+//        layout.setId(viewId);
+//
+//        FrameLayout frameLayout = new FrameLayout(this);
+//        frameLayout.setBackgroundColor(Color.parseColor(backgroundColor));
+//
+//        RelativeLayout.LayoutParams frameLayoutParams = new RelativeLayout.LayoutParams(
+//                width,
+//                height);
+//        layout.addView(frameLayout, frameLayoutParams);
+//
+//
+//        TextView silentView = new TextView(this);
+//        silentView.setText(textInfo);
+//        silentView.setTextColor(Color.parseColor(textColor)); // 文字顏色
+//        silentView.setGravity(Gravity.RIGHT); // 文字靠右
+////        silentView.setTextSize(TypedValue.COMPLEX_UNIT_PX, dpToPx(textSize)); // 字體大小
+//        silentView.setTextSize(textSize); // 字體大小
+////        silentView.setPadding(0, dpToPx(5), 0, dpToPx(5));
+//
+//
+//        silentView.setTranslationX(width);
+//
+//        //silentView寬度 (px)
+//        String dt = silentView.getText().toString();
+//        Rect bounds = new Rect();
+//        TextPaint paint = silentView.getPaint();
+//        paint.getTextBounds(dt, 0, dt.length(), bounds);
+//        int textWidth = (int)paint.measureText(textInfo);
+//
+//        RelativeLayout.LayoutParams textViewParams = new RelativeLayout.LayoutParams(
+//                textWidth,
+//                height);
+//        frameLayout.addView(silentView, textViewParams);
+//
+////        getCloseButtonStyle(viewId, layout);
+//
+//
+//        floatingViews.put(viewId, layout);
+//        windowManager.addView(layout, createLayoutParams(width, height, 0, 0, gravity));
+//        makeViewDraggable(layout);
+//
+//
+//        // 創建 Handler 和 Runnable 来更新文字位置
+////        final Handler handler = new Handler();
+////        final Runnable marquee = new Runnable() {
+////
+////            private int offset = -width;
+////            private final int step = dpToPx(1.95); // 每次更新移動的像素
+////            private final int totalWidth  = textWidth;
+////
+////            @Override
+////            public void run() {
+////                silentView.setTranslationX(-offset);
+////
+////                offset += step;
+////
+////                if (offset > totalWidth) {
+////                    offset = -width; // 重置，從頭開始
+////                }
+////                handler.postDelayed(this, 10); // X ms 後再次更新
+////            }
+////        };
+////        handler.post(marquee);
+//
+//        currentMediaList.add(viewId);
+//        playingMediaList.put(mediaType,currentMediaList);
+//
+////        waitToCloseFloatingWindow(viewId, time);
+//
+//    }
+
 
     private void getCloseButtonStyle(int viewId, RelativeLayout layout){
 
@@ -552,7 +655,6 @@ public class FloatingWindowService extends Service {
 
     private void waitToCloseFloatingWindow(int mediaId, int waitTime){
 
-
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -581,7 +683,6 @@ public class FloatingWindowService extends Service {
         thread.start();
 
         waitThread.put(mediaId, thread);
-
 
     }
 

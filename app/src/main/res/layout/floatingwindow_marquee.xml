@@ -8,8 +8,8 @@
 
     <FrameLayout
         android:id="@+id/root_container"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_gravity="center"
         android:background="@color/colorPrimaryDark">
 
@@ -18,8 +18,8 @@
 
         <TextView
             android:id="@+id/textview_marquee"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center_vertical"
             android:lines="1"

@@ -1,4 +1,4 @@
-package com.example.mdm_ycnt.FloatingWindow.module;
+package com.example.mdm_ycnt.FloatingWindow01.module;
 
 import android.content.Context;
 import android.graphics.PixelFormat;

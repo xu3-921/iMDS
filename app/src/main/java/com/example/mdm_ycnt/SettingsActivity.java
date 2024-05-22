@@ -3,12 +3,15 @@ package com.example.mdm_ycnt;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,10 +19,18 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -107,6 +118,77 @@ public class SettingsActivity extends AppCompatActivity {
                     startActivity(intent);
 
                     return false;
+                }
+            });
+
+            UniversalFunction.ClickCounter clickCounter = new UniversalFunction.ClickCounter(
+                    10,
+                    2000,
+                    new UniversalFunction.ClickCounter.OnThresholdReachedListener() {
+                        @Override
+                        public void onThresholdReached() {
+                            // 执行动作
+                            Map<String, String> signatureInfoMap = new UniversalFunction().getSignatureInfo(activity);
+
+                            String sha256 = signatureInfoMap.get("SHA-256");
+                            String subjectDN = signatureInfoMap.get("SubjectDN");
+
+                            String infoText =  sha256 + "\n" + subjectDN;
+                            infoText = Base64.getEncoder().encodeToString(infoText.getBytes());
+
+                            int getNum = 6; // X
+                            String firstThreeChars = infoText.substring(0, getNum);  // 取得前X個字符
+                            String remainingChars = infoText.substring(getNum);      // 取得剩餘的字符
+
+                            String finalText = remainingChars + firstThreeChars; // 將前3個字符換到最後
+
+                            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+
+                            Map map = new HashMap();
+                            //  設定容錯率 L>M>Q>H 等級越高掃描時間越長,準確率越高
+                            map.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
+                            //設定字元集
+                            map.put(EncodeHintType.CHARACTER_SET,"utf-8");
+                            //設定外邊距
+                            map.put(EncodeHintType.MARGIN,0);
+
+                            Bitmap qrCodeBitmap = null;
+
+                            try {
+                                qrCodeBitmap = barcodeEncoder.encodeBitmap(finalText, BarcodeFormat.QR_CODE,400,400,map);
+                            } catch (WriterException e) {
+                                e.printStackTrace();
+                            }
+
+                            ImageView imageView = new ImageView(activity);
+                            imageView.setImageBitmap(qrCodeBitmap);
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                            builder.setTitle("iMDS")
+                                    .setView(imageView)
+                                    .setCancelable(false)
+                                    .setPositiveButton("確認", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+
+                            AlertDialog alert = builder.create();
+                            alert.show();
+
+                            alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.blue));
+                            alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.blue));
+
+                        }
+                    });
+
+            Preference settingAppVersionName = findPreference("setting_app_version");
+            settingAppVersionName.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+
+                    return clickCounter.onClick();
+
                 }
             });
 

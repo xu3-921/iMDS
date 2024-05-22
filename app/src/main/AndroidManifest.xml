@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.mdm_ycnt" >
+    package="com.example.mdm_ycnt">
 
     <queries> <!-- android 11需修改目標軟件可見性 -->
         <package android:name="com.ycnt.imds.sentinel" />
-
         <package android:name="com.example.icast_control_tv_app" />
         <package android:name="com.example.icast_control_asus_tb_r2" /> <!-- tinkerBoard R2.0 -->
         <package android:name="com.example.v3_control" /> <!-- 富動v3 -->
@@ -21,7 +20,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" /> <!-- 無聲廣播權限 -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -46,20 +45,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Mdm_ycnt"
-        android:usesCleartextTraffic="true" >
+        android:usesCleartextTraffic="true">
+        <service
+            android:name=".FloatingWindowService"
+            android:enabled="true"
+            android:exported="true"></service>
         <service
             android:name=".WatchdogService"
             android:enabled="true"
-            android:exported="true" >
-        </service>
-
-
+            android:exported="true"></service>
         <service
             android:name=".EmergencyAlertService"
-            android:enabled="true"
-            android:exported="true" />
-        <service
-            android:name=".FloatingWindowService"
             android:enabled="true"
             android:exported="true" /> <!-- 允許http連線 -->
         <activity
@@ -72,7 +68,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.NoActionBar" >
+            android:theme="@style/Theme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -82,7 +78,7 @@
 
         <receiver
             android:name=".BootBroadcastReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -95,7 +91,7 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
             android:exported="false"
-            android:grantUriPermissions="true" >
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
@@ -107,9 +103,7 @@
         <service
             android:name=".MarqueeService"
             android:exported="false" />
-        <service
-            android:name=".FloatingWindow.service.FloatingService"
-            android:exported="true" />
+
     </application>
 
 </manifest>

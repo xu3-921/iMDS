@@ -14,8 +14,10 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -23,6 +25,7 @@ import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -49,6 +52,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,6 +68,9 @@ import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,6 +79,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -85,7 +93,8 @@ public class UniversalFunction {
         String url_domain = mContext.getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
                             .getString("server_ip", mContext.getResources().getString(R.string.mdm_default_url));
 
-//        String url_domain = "http://192.168.89.140/mdm/";
+//        String url_domain = "http://192.168.89.233/mdm/";
+//        String url_domain = "https://imds.tw/imdsTest/";
 
         return url_domain;
     }
@@ -200,7 +209,6 @@ public class UniversalFunction {
                                 int val = (int) ((total * 100) / contentLength);
                                 ProgressDialogSetProgress(val ,activity ,pd);
 
-
                             }
 
                         } catch (Exception e) {
@@ -224,6 +232,7 @@ public class UniversalFunction {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+
                             if(conn!=null) {
                                 //conn.disconnect();
                                 ((HttpURLConnection) conn).disconnect();
@@ -786,10 +795,10 @@ public class UniversalFunction {
                                 mContext,
                                 serviceAction,
                                 packageName,
-                                interfaceCanonicalName // AIDL接口的完整类名
+                                interfaceCanonicalName // AIDL介面的完整類別名
                          );
 
-                        if(result != null || !result.equals("error")){
+                        if(result != null || !result.equals("error") || result.equals("")){
                             deviceId = result.replace(":","");
                         }
 
@@ -818,11 +827,11 @@ public class UniversalFunction {
 
             }
 
-            String md5DeviceId = F_md5(deviceId);
+            String deviceIdAddStr = "d"+"9"+"2"+deviceId+"e";
+            String md5DeviceId = F_md5(deviceIdAddStr);
 
             SharedPreferences pref = mContext.getSharedPreferences("mdm_ycnt", MODE_PRIVATE);
             pref.edit().putString("device_id", md5DeviceId).apply();
-
 
             return md5DeviceId;
 
@@ -884,13 +893,13 @@ public class UniversalFunction {
     }
 
     //md5加密
-    public static String F_md5(String device_id){
+    public static String F_md5(String deviceId){
 
-        String id="d"+"9"+"2"+device_id+"e";
+//        String id = "d"+"9"+"2"+device_id+"e";
 
         byte[] hash;
         try {
-            hash = MessageDigest.getInstance("MD5").digest(id.getBytes("UTF-8"));
+            hash = MessageDigest.getInstance("MD5").digest(deviceId.getBytes("UTF-8"));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("NoSuchAlgorithmException",e);
         } catch (UnsupportedEncodingException e) {
@@ -1060,5 +1069,139 @@ public class UniversalFunction {
         }
         return json;
     }
+
+    /**
+     * 獲得簽名訊息
+     *
+     * @param mContext Context
+     *
+     * @return SignatureInfo Map<String, String> 包含签名信息的字符串数组 key [SHA-256,SubjectDN]
+     *
+     * @since 1.0.9
+     * @author J Lee
+     */
+    public Map<String, String> getSignatureInfo(Context mContext){
+
+        Map<String, String> signatureInfoMap = new HashMap<>();
+
+        try {
+
+            // 取得包名
+            String packageName = mContext.getPackageName();
+
+            // 取得包的訊息
+            PackageInfo packageInfo = null;
+            packageInfo = mContext.getPackageManager().getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+
+            // 获取签名信息
+            Signature[] signatures = packageInfo.signatures;
+
+            if (packageInfo.signatures != null) {
+
+                for (Signature signature : signatures) {
+
+                    byte[] signatureBytes = signature.toByteArray();
+
+                    // SHA-256
+                    String sha256Fingerprint = getFingerprint(signatureBytes, "SHA-256");
+
+                    CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+                    X509Certificate cert = (X509Certificate) certFactory.generateCertificate(new java.io.ByteArrayInputStream(signatureBytes));
+
+                    signatureInfoMap.put("SHA-256", sha256Fingerprint);
+                    signatureInfoMap.put("SubjectDN", cert.getSubjectDN().toString());
+
+                }
+
+            }
+
+        } catch (PackageManager.NameNotFoundException | CertificateException e) {
+            e.printStackTrace();
+        }
+
+        return signatureInfoMap;
+    }
+
+    private static String getFingerprint(byte[] signature, String algorithm) {
+
+        try {
+
+            MessageDigest md = MessageDigest.getInstance(algorithm);
+            md.update(signature);
+            byte[] digest = md.digest();
+            return bytesToHex(digest);
+
+        } catch (Exception e) {
+
+            return null;
+        }
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+
+        StringBuilder hexString = new StringBuilder();
+
+        for (byte b : bytes) {
+            String hex = Integer.toHexString(0xFF & b);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+
+        return hexString.toString().toUpperCase(Locale.US);
+
+    }
+
+    public static class ClickCounter {
+
+        private final int clickThreshold;
+        private final long timeThreshold;
+
+        private int clickCounter = 0;
+        private final Handler handler;
+        private final Runnable resetClickCounter;
+        private final OnThresholdReachedListener listener;
+
+        public interface OnThresholdReachedListener {
+            void onThresholdReached();
+        }
+
+        public ClickCounter(int clickThreshold, long timeThreshold, OnThresholdReachedListener listener) {
+
+            this.clickThreshold = clickThreshold;
+            this.timeThreshold = timeThreshold;
+
+            this.listener = listener;
+            this.handler = new Handler();
+            this.resetClickCounter = new Runnable() {
+                @Override
+                public void run() {
+                    clickCounter = 0;
+                }
+            };
+        }
+
+        public boolean onClick() {
+
+            clickCounter++;
+
+            if (clickCounter == 1) {
+                handler.postDelayed(resetClickCounter, timeThreshold);
+            }
+
+            if (clickCounter == clickThreshold) {
+                clickCounter = 0;
+                handler.removeCallbacks(resetClickCounter);
+                if (listener != null) {
+                    listener.onThresholdReached();
+                }
+                return true;
+            }
+
+            return false;
+        }
+    }
+
 
 }

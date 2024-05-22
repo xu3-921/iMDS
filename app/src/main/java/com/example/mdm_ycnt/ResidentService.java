@@ -1,6 +1,5 @@
 package com.example.mdm_ycnt;
 
-
 import static com.example.mdm_ycnt.Function_Get_device_state.F_getAvailableMemory;
 import static com.example.mdm_ycnt.Function_Get_device_state.F_getAvailableRAM;
 import static com.example.mdm_ycnt.Function_Get_device_state.F_getDHCPstatus;
@@ -25,7 +24,11 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.ImageDecoder;
+import android.graphics.Outline;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
@@ -34,15 +37,39 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.example.mdm_ycnt.aidlBindHelper.AsyncAidlTool;
 import com.example.mdm_ycnt.aidlBindHelper.ServiceBinderHelper;
+import com.ycnt.imds.floatingwindow.FloatingLayout;
+import com.ycnt.imds.floatingwindow.FloatingLayoutConfig;
+import com.ycnt.imds.floatingwindow.callback.FloatingListener;
+import com.ycnt.imds.floatingwindow.module.FloatingViewMovementModule;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,9 +99,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+
+
 public class ResidentService extends Service {
 
-    public final String CHANNEL_ID_STRING = "service_chatroom";
+//    public final String CHANNEL_ID_STRING = "service_chatroom";
 //    private boolean isFirstTime = true;
 
 //    private final String HttpPost_update_info_and_get_cmd_url = "php/app_php/mdm_update_data_and_get_cmd.php";
@@ -174,7 +203,244 @@ public class ResidentService extends Service {
 
         Singleton.getInstance().setSingletonData(new ArrayList<Integer>());
 
+        // 浮動視窗class example
+//        FloatingLayoutConfig config =
+//                new FloatingLayoutConfig.Builder(this)
+//                        .setLayoutRes(R.layout.info_layout)
+//                        .setMovementModule(-1)
+//                        .setGravity(Gravity.END | Gravity.TOP)
+//                        .setX(0)
+//                        .setY(0)
+//                        .setWidth(-2)
+//                        .setHeight(-2)
+//                        .setShow(true)
+//                        .setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH)
+//                        .build();
+//
+//        FloatingLayout floatingWindow = new FloatingLayout(config);
+//
+//        FloatingLayoutConfig config2 =
+//                new FloatingLayoutConfig.Builder(this)
+//                        .setLayoutRes(-1)
+//                        .setMovementModule(FloatingViewMovementModule.MOVE_AXIS_Y)
+//                        .setGravity(Gravity.END | Gravity.TOP)
+////                        .setX(16)
+//                        .setY(200)
+//                        .setWidth(-2)
+//                        .setHeight(-2)
+//                        .setShow(false)
+//                        .build();
+//
+//        FloatingLayout floatingWindow2 = new FloatingLayout(config2);
+//
+//
+//        FloatingListener floatingListener = new FloatingListener() {
+//
+//            @Override
+//            public void onCreate(View view) {
+//
+//                view.setOnTouchListener(new View.OnTouchListener() {
+//                    @Override
+//                    public boolean onTouch(View v, MotionEvent event) {
+//                        switch (event.getAction()) {
+//
+//                            case MotionEvent.ACTION_DOWN:
+//
+//                                return true;
+//
+//                            case MotionEvent.ACTION_OUTSIDE:
+//
+//                                floatingWindow.hide();
+//                                floatingWindow2.show();
+//
+//                                return false;
+//                            default:
+//
+//                                return false;
+//                        }
+//                    }
+//                });
+//
+//
+//                ImageView imageView = view.findViewById(R.id.imageView);
+//                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+//                String imageUrl = "http://192.168.89.233/test1.png";
+//
+//                Glide.with(ResidentService.this)
+//                        .load(imageUrl)
+//                        .listener(new RequestListener<Drawable>() {
+//                            @Override
+//                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+//                                // 图片加载失败时的处理
+////                                Log.e("Glide", "Image load failed", e);
+//                                return false; // 返回 false 表示让 Glide 继续处理这个事件
+//                            }
+//
+//                            @Override
+//                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+//                                // 图片加载成功时的处理
+////                                Log.d("Glide", "Image load successful");
+////                                floatingWindow.show();
+//
+////                                layout.post(new Runnable() {
+////                                    @Override
+////                                    public void run() {
+////                                        Animation slideIn = AnimationUtils.loadAnimation(ResidentService.this, com.ycnt.imds.floatingwindow.R.anim.slide_in_from_right);
+////                                        layout.startAnimation(slideIn);
+////                                    }
+////                                });
+//
+//                                return false; // 返回 false 表示让 Glide 继续处理这个事件
+//                            }
+//                        })
+//                        .into(imageView);
+//            }
+//
+//            @Override
+//            public void onClose() {
+//                Log.e("test01-5","onCloseListener");
+//            }
+//
+//            @Override
+//            public void willOpen(View view) {
+//                view.setAlpha(0.0f);
+//            }
+//
+//            @Override
+//            public void didOpen(View view) {
+//
+//                LinearLayout layout = view.findViewById(R.id.layout);
+//
+//                if(layout != null){
+//
+//                    // 建立TranslateAnimation對象
+//                    TranslateAnimation translateAnimation = new TranslateAnimation(
+//                            Animation.RELATIVE_TO_PARENT, 1.0f,  // 從右邊100%
+//                            Animation.RELATIVE_TO_PARENT, 0.0f,  // 到0%
+//                            Animation.RELATIVE_TO_PARENT, 0.0f,  // 從Y軸開始位置
+//                            Animation.RELATIVE_TO_PARENT, 0.0f   // 到Y軸結束位置
+//                    );
+//
+//                    // 設定動畫持續時間
+//                    translateAnimation.setDuration(300);
+//
+//                    view.setAlpha(1.0f);
+//                    layout.startAnimation(translateAnimation);
+//
+//
+//                }else{
+//
+//                    view.setAlpha(1.0f);
+//
+//                }
+//
+//            }
+//
+//            @Override
+//            public void willClose(View view) {
+//
+//            }
+//
+//            @Override
+//            public void didClose(View view) {
+//
+//            }
+//
+//        };
+//
+//        floatingWindow.setFloatingListener(floatingListener);
+//        floatingWindow.create();
+//
+//
+//        FloatingListener floatingListener2 = new FloatingListener() {
+//
+//            @Override
+//            public void onCreate(View view) {
+//
+//                LinearLayout getView = (LinearLayout) view;
+//
+//                // 创建RelativeLayout
+//                RelativeLayout layout = new RelativeLayout(ResidentService.this);
+//                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+//                        10,  // 设置宽度
+//                        96   // 设置高度
+//                );
+//                layout.setLayoutParams(params);
+//
+//                getView.setPadding(4,0,16,0);
+//
+//                // 设置背景颜色
+//                int alpha = 255; // 半透明
+//                int red = 78;
+//                int green = 131;
+//                int blue = 151;
+//                int color = Color.argb(alpha, red, green, blue);
+//
+//                //創建帶有圓角和邊框的GradientDrawable
+//                GradientDrawable drawable = new GradientDrawable();
+//                drawable.setColor(color); // 背景颜色
+//                float cornerRadius = 16 * getResources().getDisplayMetrics().density; // 圆角半径
+//                drawable.setCornerRadius(cornerRadius);
+//                drawable.setStroke(1, Color.parseColor("#afafafb3"));
+//
+//                // 设置drawable为layout的背景
+//                layout.setBackground(drawable);
+//
+//                // 设置clipToOutline和outlineProvider
+//                layout.setClipToOutline(true);
+//                layout.setOutlineProvider(new ViewOutlineProvider() {
+//                    @Override
+//                    public void getOutline(View view, Outline outline) {
+//                        outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius);
+//                    }
+//                });
+//
+//                getView.addView(layout);
+//
+//                view.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View view) {
+//
+//                        floatingWindow.show();
+//                        floatingWindow2.hide();
+//                    }
+//                });
+//
+//            }
+//
+//            @Override
+//            public void onClose() {
+////                Log.e("test01","onCloseListener");
+////                stopSelf();
+//            }
+//
+//            @Override
+//            public void willOpen(View view) {
+//
+//            }
+//
+//            @Override
+//            public void didOpen(View view) {
+//
+//            }
+//
+//            @Override
+//            public void willClose(View view) {
+//
+//            }
+//
+//            @Override
+//            public void didClose(View view) {
+//
+//            }
+//
+//        };
+//
+//        floatingWindow2.setFloatingListener(floatingListener2);
+//        floatingWindow2.create();
+
     }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -923,7 +1189,7 @@ public class ResidentService extends Service {
                         F_sendCMD(G_control_app_package_name,"{\"set-sleep\":\"on\"}", ResidentService.this);
 
                         //關機 開始休眠
-                        //Log.e("ttt","time to close");
+
                     }
 
                 }
@@ -1007,7 +1273,6 @@ public class ResidentService extends Service {
 
                     String key = it.next();// 獲得key
                     String value = jsonCmd.getString(key);
-                    //Log.e("testGet","key: "+key+",value:"+value);
 
                     boolean isContains = false;
 
@@ -1228,7 +1493,6 @@ public class ResidentService extends Service {
         }
         else if(G_device_register_enable.equals("T")){
 
-
             SharedPreferences defaultSharedPreferences =
                     PreferenceManager.getDefaultSharedPreferences(ResidentService.this);
             SharedPreferences.Editor defaultEditor = defaultSharedPreferences.edit();
@@ -1309,7 +1573,7 @@ public class ResidentService extends Service {
                     ResidentService.this,"com.example.mdm_ycnt.EmergencyAlertService"));
 
             boolean isSiteSetShowEmergencyAlert = getJson.getBoolean("showEmergencyAlertBtn");
-//            Log.e("test01-2_isSiteSetShowEmergencyAlert", String.valueOf(isSiteSetShowEmergencyAlert));
+
             boolean isSettingEmergencyAlertOn =
                     defaultSharedPreferences.getBoolean("setting_emergency_alert_btn", true);
 
@@ -1460,8 +1724,6 @@ public class ResidentService extends Service {
         getDeviceInfoJson.put("deviceOpenTimeList",deviceOpenTimeJson);
 
 //        Object playing_media_id_list = Singleton.getInstance().getSingletonData();
-//        Log.e("test03-3", String.valueOf(playing_media_id_list));
-//
 //        getDeviceInfoJson.put("playing_media_id_list",playing_media_id_list);
 
 
@@ -1485,6 +1747,8 @@ public class ResidentService extends Service {
 
             deviceLoopSecond = getJson.optInt("deviceLoopSecond");
             deviceLoopSecond = deviceLoopSecond != 0 ? deviceLoopSecond : 10;
+
+//            showText(String.valueOf(deviceLoopSecond));
 
             boolean isLogDeviceRuntimeSuccess = getJson.optBoolean("isLogDeviceRuntimeSuccess", false);
             if(isLogDeviceRuntimeSuccess && deviceOpenTimeJson.length() > 1){
@@ -1634,8 +1898,7 @@ public class ResidentService extends Service {
     }
 
 //    private void startAlarmManager(int min, Context mContext){
-//
-//        Log.e("test02","startAlarmManager");
+
 //
 //        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 //        Intent intent = new Intent(mContext, AlarmReceiver.class);
@@ -1657,6 +1920,127 @@ public class ResidentService extends Service {
         startForegroundService(intent);
 
     }
+
+//    private void showText(String deviceLoopSecond){
+//
+//        Intent intent = new Intent(this, FloatingWindowService.class);
+//        //必填
+//        intent.putExtra("action", "add");
+//        intent.putExtra("windowType", "text");
+//        intent.putExtra("mediaType", "text");
+//        intent.putExtra("viewId", 12341);
+//        intent.putExtra("textInfo", deviceLoopSecond);
+//
+//        startService(intent);
+//    }
+
+    //    private void addTextView(int viewId, Intent intent){
+//
+//        //螢幕寬度（px）
+////        DisplayMetrics displayMetrics = new DisplayMetrics();
+////        WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+////        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+//
+//        String textInfo = intent.getStringExtra("textInfo");
+////        int time = intent.getIntExtra("time",180);
+//
+//        String backgroundColor = intent.getStringExtra("backgroundColor") != null ?
+//                intent.getStringExtra("backgroundColor") : "#000000";
+//
+//        String textColor = intent.getStringExtra("textColor") != null ?
+//                intent.getStringExtra("textColor") : "#FFFFFF";
+//
+//        int textSize = intent.getIntExtra("textSize",35);
+////
+////        String setPosition = intent.getStringExtra("setPosition") != null ?
+////                intent.getStringExtra("setPosition") : "top";
+////
+//        int gravity = Gravity.START | Gravity.TOP;
+////
+////        if(setPosition.equals("center")){
+////            gravity = Gravity.START | Gravity.CENTER;
+////        }else if(setPosition.equals("bottom")){
+////            gravity = Gravity.START | Gravity.BOTTOM;
+////        }
+//
+//        String mediaType = intent.getStringExtra("mediaType");
+//        ArrayList<Integer> currentMediaList = checkMediaPlayingNum(mediaType);
+//
+//
+//        int width = -2;
+//        int height = -2;
+//
+//        RelativeLayout layout = new RelativeLayout(this);
+//        layout.setId(viewId);
+//
+//        FrameLayout frameLayout = new FrameLayout(this);
+//        frameLayout.setBackgroundColor(Color.parseColor(backgroundColor));
+//
+//        RelativeLayout.LayoutParams frameLayoutParams = new RelativeLayout.LayoutParams(
+//                width,
+//                height);
+//        layout.addView(frameLayout, frameLayoutParams);
+//
+//
+//        TextView silentView = new TextView(this);
+//        silentView.setText(textInfo);
+//        silentView.setTextColor(Color.parseColor(textColor)); // 文字顏色
+//        silentView.setGravity(Gravity.RIGHT); // 文字靠右
+////        silentView.setTextSize(TypedValue.COMPLEX_UNIT_PX, dpToPx(textSize)); // 字體大小
+//        silentView.setTextSize(textSize); // 字體大小
+////        silentView.setPadding(0, dpToPx(5), 0, dpToPx(5));
+//
+//
+//        silentView.setTranslationX(width);
+//
+//        //silentView寬度 (px)
+//        String dt = silentView.getText().toString();
+//        Rect bounds = new Rect();
+//        TextPaint paint = silentView.getPaint();
+//        paint.getTextBounds(dt, 0, dt.length(), bounds);
+//        int textWidth = (int)paint.measureText(textInfo);
+//
+//        RelativeLayout.LayoutParams textViewParams = new RelativeLayout.LayoutParams(
+//                textWidth,
+//                height);
+//        frameLayout.addView(silentView, textViewParams);
+//
+////        getCloseButtonStyle(viewId, layout);
+//
+//
+//        floatingViews.put(viewId, layout);
+//        windowManager.addView(layout, createLayoutParams(width, height, 0, 0, gravity));
+//        makeViewDraggable(layout);
+//
+//
+//        // 創建 Handler 和 Runnable 来更新文字位置
+////        final Handler handler = new Handler();
+////        final Runnable marquee = new Runnable() {
+////
+////            private int offset = -width;
+////            private final int step = dpToPx(1.95); // 每次更新移動的像素
+////            private final int totalWidth  = textWidth;
+////
+////            @Override
+////            public void run() {
+////                silentView.setTranslationX(-offset);
+////
+////                offset += step;
+////
+////                if (offset > totalWidth) {
+////                    offset = -width; // 重置，從頭開始
+////                }
+////                handler.postDelayed(this, 10); // X ms 後再次更新
+////            }
+////        };
+////        handler.post(marquee);
+//
+//        currentMediaList.add(viewId);
+//        playingMediaList.put(mediaType,currentMediaList);
+//
+////        waitToCloseFloatingWindow(viewId, time);
+//
+//    }
 
 
 }

@@ -21,7 +21,9 @@ import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.media.projection.MediaProjectionManager;
@@ -56,6 +58,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,6 +70,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -106,6 +111,10 @@ public class MainActivity extends AppCompatActivity {
 
         checkDevicePermissions();
 
+        Map<String, String> signatureInfoMap = universalFunction_instance.getSignatureInfo(this);
+        Log.e("test04-1",signatureInfoMap.get("SHA-256"));
+        Log.e("test04-1",signatureInfoMap.get("SubjectDN"));
+
     }
 
     private void is_update_imds_app(){
@@ -116,9 +125,13 @@ public class MainActivity extends AppCompatActivity {
             String isLastVersion = null;
 
             if(getJson == null){
+
                 isLastVersion = "error";
+
             }else {
+
                 isLastVersion = getJson.getString("is_last_version");
+
             }
 
             // newest_ver:最新版
@@ -1553,7 +1566,6 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
 
 
                         AlertDialog.Builder alertDialogBuilderHint =

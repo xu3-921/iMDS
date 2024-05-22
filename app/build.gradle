@@ -9,8 +9,8 @@ android {
         applicationId "com.example.mdm_ycnt"
         minSdk 26
         targetSdk 31
-        versionCode 8
-        versionName "1.0.8" //-beta
+        versionCode 9
+        versionName "1.0.9-beta202405221502" //-beta
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -29,8 +29,19 @@ android {
 
             def versionName = variant.versionName
             def versionCode = variant.versionCode
+
             //fileName = "${formattedDate}_HELLO_Android_${flavorName}_${buildName}_v${versionName}(${versionCode}).apk"
-            fileName = "iMDS_${versionName}_${formattedDate}.apk"
+
+            // 检查是否签名配置被禁用
+            if (variant.signingConfig == null) {
+                // 未签名的 release APK
+                fileName = "iMDS_${versionName}_${formattedDate}_unsigned.apk"
+            } else {
+                // 签名的 release APK
+                fileName = "iMDS_${versionName}_${formattedDate}.apk"
+            }
+
+//            fileName = "iMDS_${versionName}_${formattedDate}.apk"
 
         }else{
             fileName = "app-debug.apk"
@@ -89,5 +100,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.12.0'
+
+    implementation project(':floatingWindow')
 
 }
