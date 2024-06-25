@@ -26,15 +26,6 @@ import com.ycnt.imds.floatingwindow.R;
 
 public class FloatingWindowModule {
 
-//    private int layoutRes;
-//    private int gravity;
-//    private Context context;
-//    public final int x;
-//    public final int y;
-//    public final int width;
-//    public final int height;
-//    public final boolean isShow;
-
     private FloatingLayoutConfig config;
 
     private WindowManager.LayoutParams params;
@@ -83,11 +74,12 @@ public class FloatingWindowModule {
             params = new WindowManager.LayoutParams(
                     config.getWidth(),
                     config.getHeight(),
-                    getWindowType(),
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                     config.getFlags(),
                     PixelFormat.TRANSLUCENT
             );
         }
+
 
 //        WindowManager.LayoutParams.MATCH_PARENT
 //        WindowManager.LayoutParams.WRAP_CONTENT
@@ -157,24 +149,12 @@ public class FloatingWindowModule {
         if(!config.isShow()){
             view.setVisibility(View.GONE);
         }
-//        else {
-//
-//                view = createDefaultView(context);
-//            }
+
 
         return view;
     }
 
     private View createDefaultView(Context context) {
-
-//        TextView textView = new TextView(context);
-//        textView.setLayoutParams(new ViewGroup.LayoutParams(
-//                ViewGroup.LayoutParams.MATCH_PARENT,
-//                ViewGroup.LayoutParams.WRAP_CONTENT
-//        ));
-//        textView.setText("默认内容");
-//        textView.setGravity(Gravity.CENTER);
-//        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
 
         LinearLayout container = new LinearLayout(context);
         container.setLayoutParams(new LinearLayout.LayoutParams(
@@ -186,10 +166,10 @@ public class FloatingWindowModule {
         return container;
     }
 
-    public int getWindowType() {
-        // Set to TYPE_SYSTEM_ALERT so that the Service can display it
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-    }
+//    public int getWindowType() {
+//        // Set to TYPE_SYSTEM_ALERT so that the Service can display it
+//        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+//    }
 
     public WindowManager getWindowManager() {
         return windowManager;

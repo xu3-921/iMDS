@@ -19,6 +19,7 @@ import com.ycnt.imds.floatingwindow.callback.FloatingListener;
 import com.ycnt.imds.floatingwindow.service.FloatingService;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class FloatingLayout {
 
@@ -31,13 +32,6 @@ public class FloatingLayout {
     private String uniqueId;
 
 
-//    private int layoutRes;
-//    private int move_axis;
-//    public int gravity;
-//    public int x;
-//    public int y;
-//    public int width;
-//    public int height;
     public boolean isShow;
 
     private FloatingListener floatingListener;
@@ -45,6 +39,9 @@ public class FloatingLayout {
     private Intent intent;
 
     boolean isBound = false;
+
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
 //    private boolean isShow;
 
     public FloatingLayout(FloatingLayoutConfig config) {
@@ -52,13 +49,6 @@ public class FloatingLayout {
         this.config = config;
 
         this.context = config.getContext();
-//        this.layoutRes = config.getLayoutRes();
-//        this.move_axis = config.getMovementModule();
-//        this.gravity = config.getGravity();
-//        this.x = config.getX();
-//        this.y = config.getY();
-//        this.width = config.getWidth();
-//        this.height = config.getHeight();
         this.isShow = config.isShow();
 
     }
@@ -93,14 +83,14 @@ public class FloatingLayout {
         @Override
         public void onServiceDisconnected(ComponentName name) {
 
-            Log.e("test01-4", "onServiceDisconnected");
-
             // 處理服務斷開連線的情況
             isBound = false;
 
             if(floatingListener != null){
                 floatingListener.onClose();
             }
+
+            clearHandler();
 
         }
 
@@ -109,23 +99,10 @@ public class FloatingLayout {
     public void create() {
 
         this.uniqueId = UUID.randomUUID().toString();
-        Log.e("test02-3", uniqueId);
-//        isShow = true;
 
         intent = new Intent(context, FloatingService.class);
 
         intent.putExtra(FloatingService.EXTRA_UNIQUE_ID, uniqueId);
-
-//        intent.putExtra(FloatingService.EXTRA_LAYOUT_RESOURCE, layoutRes);
-//        intent.putExtra(FloatingService.EXTRA_MOVE_AXIS, move_axis);
-//        intent.putExtra(FloatingService.EXTRA_GRAVITY, gravity);
-//        intent.putExtra(FloatingService.EXTRA_X, x);
-//        intent.putExtra(FloatingService.EXTRA_Y, y);
-//        intent.putExtra(FloatingService.EXTRA_WIDTH, width);
-//        intent.putExtra(FloatingService.EXTRA_HEIGHT, height);
-//        intent.putExtra(FloatingService.EXTRA_IS_SHOW, isShow);
-
-
 
         context.startService(intent);
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -134,17 +111,36 @@ public class FloatingLayout {
 
     }
 
+//    public void destroy() {
+//
+//        // 斷開連線
+//        if(isBound){
+//            binder.unbindService(uniqueId);
+//            context.unbindService(serviceConnection);
+//            isBound = false;
+//        }
+//
+//    }
+
     public void destroy() {
 
-        // 斷開連線
-        if(isBound){
-            binder.unbindService(uniqueId);
-            context.unbindService(serviceConnection);
-            isBound = false;
-        }
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                // 斷開連線
+                if (isBound) {
+
+                    floatingListener.onClose();
+
+                    context.unbindService(serviceConnection);
+                    binder.unbindService(uniqueId);
+                    isBound = false;
+                }
+                clearHandler(); // 清除所有的回調和訊息
+            }
+        });
 
     }
-
 
     public void show(){
 
@@ -159,13 +155,12 @@ public class FloatingLayout {
 
             floatingListener.didOpen(view);
 
-
         }
-
 
     }
 
     public void hide(){
+
 
         View view = binder.getView();
 
@@ -177,9 +172,12 @@ public class FloatingLayout {
             isShow = false;
 
             floatingListener.didClose(view);
+
+
         }
 
     }
+
 
     public boolean isShow() {
         return isShow;
@@ -190,5 +188,10 @@ public class FloatingLayout {
 //            intent = new Intent(context, FloatingService.class);
 //        return intent;
 //    }
+
+    // 清除所有的回調和訊息
+    private void clearHandler() {
+        mainHandler.removeCallbacksAndMessages(null);
+    }
 }
 

@@ -13,19 +13,8 @@ import com.ycnt.imds.floatingwindow.module.FloatingWindowModule;
 
 public class FloatingComponent {
 
-
-//    private int layoutRes;
-//    private int move_axis;
-//    private int gravity;
-//    public final int x;
-//    public final int y;
-//    public final int width;
-//    public final int height;
-//    public final boolean isShow;
-
     private FloatingLayoutConfig config;
 
-//    private Context context;
     private FloatingWindowModule floatingWindowModule;
     private FloatingViewMovementModule floatingViewMovementModule;
 
@@ -33,38 +22,22 @@ public class FloatingComponent {
 
         this.config = config;
 
-//        int layoutRes, Context context, int move_axis, int gravity, int x, int y, int width, int height, boolean isShow
-
-//        this.layoutRes = layoutRes;
-//        this.context = context;
-//        this.move_axis = move_axis;
-//        this.gravity = gravity;
-//
-//        this.x = x;
-//        this.y = y;
-//        this.width = width;
-//        this.height = height;
-//        this.isShow = isShow;
-
     }
 
     public void setUp() {
 
-        int ROOT_CONTAINER_ID = getViewRootId();
+//        int ROOT_CONTAINER_ID = getViewRootId();
 
-//        floatingWindowModule = new FloatingWindowModule(context, layoutRes, gravity, x, y, width, height, isShow);
         floatingWindowModule = new FloatingWindowModule(config);
         floatingWindowModule.create();
 
         View floatingView = floatingWindowModule.getView();
-        View rootContainer = floatingView.findViewById(ROOT_CONTAINER_ID);
+//        View rootContainer = floatingView.findViewById(ROOT_CONTAINER_ID);
 
         floatingViewMovementModule =
                 new FloatingViewMovementModule(
-                        floatingWindowModule.getParams(),
                         floatingView,
-                        floatingWindowModule.getWindowManager(),
-                        floatingView
+                        floatingWindowModule.getWindowManager()
                 );
 
         int move_axis = config.getMovementModule();
@@ -75,11 +48,10 @@ public class FloatingComponent {
 
     }
 
-
-    public int getViewRootId(){
-        Context context = config.getContext();
-        return context.getResources().getIdentifier("root_container", "id", context.getPackageName());
-    }
+//    public int getViewRootId(){
+//        Context context = config.getContext();
+//        return context.getResources().getIdentifier("root_container", "id", context.getPackageName());
+//    }
 
     public FloatingWindowModule getFloatingWindowModule() {
         return floatingWindowModule;

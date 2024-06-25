@@ -10,7 +10,7 @@ android {
         minSdk 26
         targetSdk 31
         versionCode 9
-        versionName "1.0.9-beta202405221502" //-beta
+        versionName "1.0.9-beta20240611095224" //-beta
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -60,6 +60,7 @@ android {
         }
     }
     compileOptions {
+
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }

@@ -52,9 +52,9 @@ public class ServiceBinderHelper<T> {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             try {
-                // 获取AIDL Stub类
+                // 取得AIDL Stub類
                 Class<?> stub = Class.forName(interfaceCanonicalName + "$Stub");
-                // 调用asInterface方法
+                // 呼叫asInterface方法
                 Method asInterfaceMethod = stub.getDeclaredMethod("asInterface", IBinder.class);
                 myService = (T) asInterfaceMethod.invoke(null, service);
                 if (serviceBindListener != null) {

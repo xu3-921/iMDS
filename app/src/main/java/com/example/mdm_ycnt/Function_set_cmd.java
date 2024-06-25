@@ -37,75 +37,42 @@ public class Function_set_cmd {
     int defaultTime = 180;
 
     /**
-     * iMDS 生成 無聲廣播-跑馬燈
+     * 生成無聲廣播 - 跑馬燈
      *
-     * @author J Lee
+     * @param getValue 無聲廣播參數-JSON格式
+     *                 參數TYPE:
+     *                 - text: 無聲廣播內容
+     *                 - timeType: 播放時間類型 (designatedTime-指定時間 / durationTime-持續時間)
+     *                 - designatedTime: 讀 designatedTime
+     *                 - durationTime: 讀 time持續時間(s)
+     *                 - mediaId: 廣播的ID
+     *                 - textSize: 字體大小
+     *                 - textColor: 字體顏色
+     *                 - backgroundColor: 背景顏色
+     *                 - setPosition: 無聲廣播位置 (top / center / bottom)
+     *
+     * @param mContext 上下文
+     * @param nowTime 當前時間 yyyy-MM-dd HH:mm:ss
+     *
      * @since 1.0.5
+     * @author J Lee
      */
-    public void F_set_marquee(String getValue, Context mContext, String nowTime){
-
-        //Log.e("test03",getValue);
-
-        //{"set-marquee":"{\"text\":\"請班長到教務處找高主任\",\"time\":\"300\"}"}
-
-        /*
-        * set-marquee - type
-        *
-        * text : 無聲廣播內容
-        * timeType : 播放時間類型(designatedTime-指定時間 / durationTime-持續時間)
-        * designatedTime 讀 designatedTime
-        * durationTime 讀 time持續時間(s)
-        *
-        * mediaId : 廣播的ID
-        * textSize : 字體大小
-        * textColor : 字體顏色
-        * backgroundColor : 背景顏色
-        * setPosition : 無聲廣播位置 (top / center /bottom)
-        * */
-
+    public void setSilentBroadcast(String getValue, Context mContext, String nowTime){
 
         try {
             JSONObject getJson = new JSONObject(getValue);
 
-            String getText = getJson.getString("text");//.replaceAll("\\R", "  ")
-            int mediaId = getJson.getInt("mediaId");
             int playingSecond = getMediaTimeTypeAndCalculate(getJson, nowTime);
 
-            int textSize = getJson.optInt("textSize");
-            String textColor = getJson.optString("textColor");
-            String backgroundColor = getJson.optString("backgroundColor");
-            String setPosition = getJson.optString("setPosition");
-
+            getJson.put("windowType", "silentBroadcast");
+            getJson.put("mediaType", "silentBroadcast");
+            getJson.put("time", playingSecond);
 
             Intent intent = new Intent(mContext, FloatingWindowService.class);
-            //必須
             intent.putExtra("action", "add");
-            intent.putExtra("windowType", "silentBroadcast");
-            intent.putExtra("mediaType", "silentBroadcast");
-            intent.putExtra("viewId", mediaId);
-            intent.putExtra("textInfo", getText);
-            intent.putExtra("time", playingSecond);
-
-            //選填
-            if(textSize != 0){
-                intent.putExtra("textSize", textSize);
-            }
-
-            if(textColor.length() > 0){
-                intent.putExtra("textColor", textColor);
-            }
-
-            if(backgroundColor.length() > 0){
-                intent.putExtra("backgroundColor", backgroundColor);
-            }
-
-            if(setPosition.length() > 0){
-                intent.putExtra("setPosition", setPosition);
-            }
-
+            intent.putExtra("data", String.valueOf(getJson));
 
             mContext.startService(intent);
-
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -114,11 +81,53 @@ public class Function_set_cmd {
     }
 
     /**
+     * 生成無聲廣播 - 文字
      *
-     * iMDS 使用瀏覽器開啟一個指定的URL
+     * @param getValue 無聲廣播參數-JSON格式
+     *                 參數TYPE:
+     *                 - text: 無聲廣播內容
+     *                 - timeType: 播放時間類型 (designatedTime-指定時間 / durationTime-持續時間)
+     *                 - designatedTime: 讀 designatedTime
+     *                 - durationTime: 讀 time持續時間(s)
+     *                 - mediaId: 廣播的ID
+     *                 - textSize: 字體大小
+     *                 - textColor: 字體顏色
+     *                 - backgroundColor: 背景顏色
      *
-     * @param getValue webUrl
-     * @param mContext Context
+     * @param mContext 上下文
+     * @param nowTime 當前時間 yyyy-MM-dd HH:mm:ss
+     *
+     * @since 1.0.9
+     * @author J Lee
+     */
+    public void setTextBroadcast(String getValue, Context mContext, String nowTime){
+
+        try {
+            JSONObject getJson = new JSONObject(getValue);
+
+            int playingSecond = getMediaTimeTypeAndCalculate(getJson, nowTime);
+
+            getJson.put("windowType", "text");
+            getJson.put("mediaType", "text");
+            getJson.put("time", playingSecond);
+
+            Intent intent = new Intent(mContext, FloatingWindowService.class);
+            intent.putExtra("action", "add");
+            intent.putExtra("data", String.valueOf(getJson));
+
+            mContext.startService(intent);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 使用瀏覽器開啟一個指定的URL
+     *
+     * @param getValue 取得的網址
+     * @param mContext 上下文
      *
      * @author J Lee
      * @since 1.0.6
@@ -140,108 +149,86 @@ public class Function_set_cmd {
 
     }
 
-    //1.0.6
+    /**
+     * 生成聲音廣播 - 透過webView開啟
+     *
+     * @param getValue 聲音廣播參數-JSON格式
+     *                 參數TYPE:
+     *                 - url : 音檔url
+     *                 - timeType: 播放時間類型 (designatedTime-指定時間 / durationTime-持續時間)
+     *                 - designatedTime: 讀 designatedTime
+     *                 - durationTime: 讀 time持續時間(s)
+     *                 - mediaId : 廣播的ID
+     *                 - width : 寬 (dp)
+     *                 - height : 高 (dp)
+     *                 - x : 向右偏移最左邊的值 (dp)
+     *                 - y : 向下偏移最上方的值 (dp)
+     *
+     * @param mContext 上下文
+     * @param nowTime 當前時間 yyyy-MM-dd HH:mm:ss
+     *
+     * @since 1.0.6
+     * @author J Lee
+     */
     public void F_set_audio(String getValue, Context mContext, String nowTime){
 
-        /*
-         * set-audio - type
-         *
-         * url : 音檔url
-         * time : 持續時間
-         * mediaId : 廣播的ID
-         * width : 寬 (dp)
-         * height : 高 (dp)
-         * x : 向右偏移最左邊的值 (dp)
-         * y : 向下偏移最上方的值 (dp)
-         * */
-
         try {
+
             JSONObject getJson = new JSONObject(getValue);
 
-            String url = getJson.getString("url");
-            int mediaId = getJson.getInt("mediaId");
             int playingSecond = getMediaTimeTypeAndCalculate(getJson, nowTime);
 
-            int width = getJson.optInt("width");
-            int height = getJson.optInt("height");
-
-            int x = getJson.optInt("x");
-            int y = getJson.optInt("y");
-
-            width = width != 0 ? width : 300;
-            height = height != 0 ? height : 200;
-
-            x = x != 0 ? x : 20;
-            y = y != 0 ? y : 90;
+            getJson.put("windowType", "web");
+            getJson.put("mediaType", "audio");
+            getJson.put("time", playingSecond);
 
             Intent intent = new Intent(mContext, FloatingWindowService.class);
-            //必填
             intent.putExtra("action", "add");
-            intent.putExtra("windowType", "web");
-            intent.putExtra("mediaType", "audio");
-            intent.putExtra("viewId", mediaId);
-            intent.putExtra("url", url);
-            intent.putExtra("time", playingSecond);
-            //選填
-            intent.putExtra("width", width);
-            intent.putExtra("height", height);
-            intent.putExtra("x", x);
-            intent.putExtra("y", y);
+            intent.putExtra("data", String.valueOf(getJson));
 
             mContext.startService(intent);
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 
-    //1.0.6
+    /**
+     * 生成影片廣播 - 透過webView開啟
+     *
+     * @param getValue 影片廣播參數-JSON格式
+     *                 參數TYPE:
+     *                 - url : 影片url
+     *                 - timeType: 播放時間類型 (designatedTime-指定時間 / durationTime-持續時間)
+     *                 - designatedTime: 讀 designatedTime
+     *                 - durationTime: 讀 time持續時間(s)
+     *                 - mediaId : 廣播的ID
+     *                 - width : 寬 (dp)
+     *                 - height : 高 (dp)
+     *                 - x : 向右偏移最左邊的值 (dp)
+     *                 - y : 向下偏移最上方的值 (dp)
+     *
+     * @param mContext 上下文
+     * @param nowTime 當前時間 yyyy-MM-dd HH:mm:ss
+     *
+     * @since 1.0.6
+     * @author J Lee
+     */
     public void F_set_video(String getValue, Context mContext, String nowTime){
 
-        /*
-         * set-vidoe - type
-         *
-         * url : 影片url
-         * time : 持續時間
-         * mediaId : 廣播的ID
-         * width : 寬 (dp)
-         * height : 高 (dp)
-         * x : 向右偏移最左邊的值 (dp)
-         * y : 向下偏移最上方的值 (dp)
-         * */
-
         try {
+
             JSONObject getJson = new JSONObject(getValue);
 
-            String url = getJson.getString("url");
-
-            int mediaId = getJson.getInt("mediaId");
             int playingSecond = getMediaTimeTypeAndCalculate(getJson, nowTime);
 
-            int width = getJson.optInt("width");
-            int height = getJson.optInt("height");
-
-            width = width != 0 ? width : -1;
-            height = height != 0 ? height : -1;
-
-            int x = getJson.optInt("x");
-            int y = getJson.optInt("y");
-
+            getJson.put("windowType", "web");
+            getJson.put("mediaType", "video");
+            getJson.put("time", playingSecond);
 
             Intent intent = new Intent(mContext, FloatingWindowService.class);
-            //必填
             intent.putExtra("action", "add");
-            intent.putExtra("windowType", "web");
-            intent.putExtra("mediaType", "video");
-            intent.putExtra("viewId", mediaId);
-            intent.putExtra("url", url);
-            intent.putExtra("time", playingSecond);
-            //選填
-            intent.putExtra("width", width);
-            intent.putExtra("height", height);
-            intent.putExtra("x", x);
-            intent.putExtra("y", y);
+            intent.putExtra("data", String.valueOf(getJson));
 
             mContext.startService(intent);
 
@@ -251,51 +238,42 @@ public class Function_set_cmd {
 
     }
 
-    //1.0.6
+    /**
+     * 生成圖片廣播
+     *
+     * @param getValue 影片廣播參數-JSON格式
+     *                 參數TYPE:
+     *                 - url : 圖片url
+     *                 - timeType: 播放時間類型 (designatedTime-指定時間 / durationTime-持續時間)
+     *                 - designatedTime: 讀 designatedTime
+     *                 - durationTime: 讀 time持續時間(s)
+     *                 - mediaId : 廣播的ID
+     *                 - width : 寬 (dp)
+     *                 - height : 高 (dp)
+     *                 - x : 向右偏移最左邊的值 (dp)
+     *                 - y : 向下偏移最上方的值 (dp)
+     *
+     * @param mContext 上下文
+     * @param nowTime 當前時間 yyyy-MM-dd HH:mm:ss
+     *
+     * @since 1.0.6
+     * @author J Lee
+     */
     public void F_set_image(String getValue, Context mContext, String nowTime){
 
-        /*
-         * set-photo - type
-         *
-         * url : 圖片url
-         * time : 持續時間
-         * mediaId : 廣播的ID
-         * width : 寬 (dp)
-         * height : 高 (dp)
-         * x : 向右偏移最左邊的值 (dp)
-         * y : 向下偏移最上方的值 (dp)
-         * */
-
         try {
 
             JSONObject getJson = new JSONObject(getValue);
 
-            String url = getJson.getString("url");
-            int mediaId = getJson.getInt("mediaId");
             int playingSecond = getMediaTimeTypeAndCalculate(getJson, nowTime);
 
-            int width = getJson.optInt("width");
-            int height = getJson.optInt("height");
-
-            width = width != 0 ? width : -1;
-            height = height != 0 ? height : -1;
-
-            int x = getJson.optInt("x");
-            int y = getJson.optInt("y");
+            getJson.put("windowType", "image");
+            getJson.put("mediaType", "image");
+            getJson.put("time", playingSecond);
 
             Intent intent = new Intent(mContext, FloatingWindowService.class);
-            //必填
             intent.putExtra("action", "add");
-            intent.putExtra("windowType", "image");
-            intent.putExtra("mediaType", "image");
-            intent.putExtra("viewId", mediaId);
-            intent.putExtra("url", url);
-            intent.putExtra("time", playingSecond);
-            //選填
-            intent.putExtra("width", width);
-            intent.putExtra("height", height);
-            intent.putExtra("x", x);
-            intent.putExtra("y", y);
+            intent.putExtra("data", String.valueOf(getJson));
 
             mContext.startService(intent);
 
@@ -305,24 +283,23 @@ public class Function_set_cmd {
 
     }
 
-    //1.0.6
+    /**
+     * 關閉指定mediaId的FloatingWindow
+     *
+     * @param getValue 關閉的參數-JSON格式
+     *                 參數TYPE:
+     *                 - mediaId : 廣播的ID
+     *
+     * @param mContext 上下文
+     *
+     * @since 1.0.6
+     */
     public void F_stop_floating_window(String getValue, Context mContext){
 
-        try {
-            JSONObject getJson = null;
-            getJson = new JSONObject(getValue);
-
-            int mediaId = getJson.getInt("mediaId");
-
-            Intent removeIntent = new Intent(mContext, FloatingWindowService.class);
-            removeIntent.putExtra("action", "remove");
-            removeIntent.putExtra("viewId", mediaId);
-            mContext.startService(removeIntent);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
+        Intent removeIntent = new Intent(mContext, FloatingWindowService.class);
+        removeIntent.putExtra("action", "remove");
+        removeIntent.putExtra("data", getValue);
+        mContext.startService(removeIntent);
 
     }
 
@@ -490,7 +467,19 @@ public class Function_set_cmd {
 
     }
 
-
+    /**
+     * 計算media的播放時間
+     *
+     * @param dataJson 獲取dataJson中的 timeType/designatedTime/time
+     *                 timeType分為designatedTime(指定時間) / durationTime(持續時間)
+     *
+     *                 designatedTime時拿designatedTime(HH:mm:ss) 計算出 持續執行時間(s)
+     *                 durationTime時拿time,time就是 持續執行時間(s)
+     *
+     * @param nowTime 當前時間 yyyy-MM-dd HH:mm:ss
+     *
+     * @return 持續執行時間(s)
+     */
     private int getMediaTimeTypeAndCalculate(JSONObject dataJson, String nowTime) throws JSONException {
 
         int playingSecond = defaultTime;

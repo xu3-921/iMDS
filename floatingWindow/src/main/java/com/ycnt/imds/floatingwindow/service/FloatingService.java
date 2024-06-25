@@ -13,6 +13,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.ycnt.imds.floatingwindow.FloatingLayoutConfig;
+import com.ycnt.imds.floatingwindow.callback.FloatingListener;
 import com.ycnt.imds.floatingwindow.component.FloatingComponent;
 
 import java.util.HashMap;
@@ -23,18 +24,10 @@ public class FloatingService extends Service {
 
 
     public static final String EXTRA_UNIQUE_ID = "extra_unique_id";
-//    public static final String EXTRA_LAYOUT_RESOURCE = "extra_layout_resource";
-//    public static final String EXTRA_MOVE_AXIS = "extra_move_axis";
-//    public static final String EXTRA_GRAVITY = "extra_gravity";
-//    public static final String EXTRA_X = "extra_x";
-//    public static final String EXTRA_Y = "extra_y";
-//    public static final String EXTRA_WIDTH = "extra_width";
-//    public static final String EXTRA_HEIGHT = "extra_height";
-//    public static final String EXTRA_IS_SHOW = "extra_is_show";
+
 
     private final Map<String, LocalBinder> binderMap = new HashMap<>();
     private final Map<String, FloatingComponent> floatingComponentHashMap = new HashMap<>();
-
 
     public class LocalBinder extends Binder {
         private final String uniqueId;
@@ -45,9 +38,6 @@ public class FloatingService extends Service {
 
         public void createFloatingWindow(FloatingLayoutConfig config){
 
-            Log.e("test03-1",uniqueId);
-//            FloatingComponent floatingComponent =
-//                    new FloatingComponent(layoutRes, this, move_axis, gravity, x, y, width, height , isShow);
 
             FloatingComponent floatingComponent =
                     new FloatingComponent(config);
@@ -78,22 +68,14 @@ public class FloatingService extends Service {
         }
 
         public void unbindService(String uniqueId) {
+
+//            floatingListener.onClose();
             FloatingService.this.unbindService(uniqueId);
+
         }
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-
-        String uniqueId = intent.getStringExtra(EXTRA_UNIQUE_ID);
-
-        return binderMap.get(uniqueId);
-    }
-
-
     private void unbindService(String uniqueId) {
-
-//        Log.e("test01-3", "unbindService " + uniqueId);
 
         LocalBinder binder = binderMap.get(uniqueId);
         FloatingComponent getFloatingComponent = floatingComponentHashMap.get(uniqueId);
@@ -110,11 +92,18 @@ public class FloatingService extends Service {
         }
 
         if (binderMap.isEmpty() && floatingComponentHashMap.isEmpty()) {
+
             stopSelf();
         }
 
-//        Log.e("test01-3 binderMap", String.valueOf(binderMap.size()));
-//        Log.e("test01-3 floatingComponentHashMap", String.valueOf(floatingComponentHashMap.size()));
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+
+        String uniqueId = intent.getStringExtra(EXTRA_UNIQUE_ID);
+
+        return binderMap.get(uniqueId);
     }
 
     @Override
@@ -124,7 +113,7 @@ public class FloatingService extends Service {
             stopSelf();
         }
 
-        return true;
+        return super.onUnbind(intent);
     }
 
     @Override
@@ -136,8 +125,6 @@ public class FloatingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        Log.e("test02", "onStartCommand");
-
         if (intent != null) {
 
             String uniqueId = intent.getStringExtra(EXTRA_UNIQUE_ID);
@@ -146,22 +133,6 @@ public class FloatingService extends Service {
 
                 binderMap.put(uniqueId, new LocalBinder(uniqueId));
 
-//                int layoutRes = intent.getIntExtra(EXTRA_LAYOUT_RESOURCE, -1);
-//                int move_axis = intent.getIntExtra(EXTRA_MOVE_AXIS, -1);
-//                int gravity = intent.getIntExtra(EXTRA_GRAVITY, Gravity.START | Gravity.TOP);
-//                int x = intent.getIntExtra(EXTRA_X, 0);
-//                int y = intent.getIntExtra(EXTRA_Y, 0);
-//                int width = intent.getIntExtra(EXTRA_WIDTH, -2);
-//                int height = intent.getIntExtra(EXTRA_HEIGHT, -2);
-//                boolean isShow = intent.getBooleanExtra(EXTRA_IS_SHOW, true);
-
-
-//                FloatingComponent floatingComponent =
-//                        new FloatingComponent(layoutRes, this, move_axis, gravity, x, y, width, height , isShow);
-//
-//                floatingComponent.setUp();
-//
-//                floatingComponentHashMap.put(uniqueId, floatingComponent);
             }
         }
 
@@ -183,8 +154,6 @@ public class FloatingService extends Service {
 
             floatingComponentHashMap.clear();
         }
-
-        Log.e("test01-5", "service onDestroy");
 
         super.onDestroy();
     }

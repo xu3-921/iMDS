@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
@@ -510,19 +511,24 @@ public class UniversalFunction {
         if(nowAppVersionCode != -1){
             try {
 
+                Map<String, String> signatureInfoMap = getSignatureInfo(mContext);
+
                 JSONObject jsonObjectData = new JSONObject();
                 jsonObjectData.put("id", UniversalFunction.F_getDeviceId(mContext));
                 jsonObjectData.put("nowAppVersionCode", nowAppVersionCode);
+                jsonObjectData.put("SHA-256", signatureInfoMap.get("SHA-256"));
+                jsonObjectData.put("SubjectDN", signatureInfoMap.get("SubjectDN"));
+
+//                Log.e("test04-2", String.valueOf(jsonObjectData));
 
                 getJson = UniversalFunction.HttpPostData(phpUrl ,jsonObjectData, mContext);
-
+//                Log.e("test04-3", String.valueOf(getJson));
 
             } catch (JSONException e) {
                 e.printStackTrace();
 
             }
         }
-
 
         return getJson;
     }
@@ -547,12 +553,16 @@ public class UniversalFunction {
 
                 try {
 
+                    Map<String, String> signatureInfoMap = getSignatureInfo(mContext);
+
                     JSONObject jsonObjectData = new JSONObject();
                     jsonObjectData.put("packageName", controlAppPackageName);
                     jsonObjectData.put("nowAppVersionCode", nowAppVersionCode);
+                    jsonObjectData.put("SHA-256", signatureInfoMap.get("SHA-256"));
+                    jsonObjectData.put("SubjectDN", signatureInfoMap.get("SubjectDN"));
 
                     getJson = UniversalFunction.HttpPostData(phpUrl ,jsonObjectData, mContext);
-
+//                    Log.e("test04-4", String.valueOf(getJson));
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -1080,7 +1090,7 @@ public class UniversalFunction {
      * @since 1.0.9
      * @author J Lee
      */
-    public Map<String, String> getSignatureInfo(Context mContext){
+    public static Map<String, String> getSignatureInfo(Context mContext){
 
         Map<String, String> signatureInfoMap = new HashMap<>();
 
@@ -1093,7 +1103,7 @@ public class UniversalFunction {
             PackageInfo packageInfo = null;
             packageInfo = mContext.getPackageManager().getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
 
-            // 获取签名信息
+            // 取得簽名信息
             Signature[] signatures = packageInfo.signatures;
 
             if (packageInfo.signatures != null) {
@@ -1203,5 +1213,8 @@ public class UniversalFunction {
         }
     }
 
+    public int dpToPx(int dp, Context mContext) {
+        return (int) (dp * mContext.getResources().getDisplayMetrics().density);
+    }
 
 }

@@ -111,10 +111,6 @@ public class MainActivity extends AppCompatActivity {
 
         checkDevicePermissions();
 
-        Map<String, String> signatureInfoMap = universalFunction_instance.getSignatureInfo(this);
-        Log.e("test04-1",signatureInfoMap.get("SHA-256"));
-        Log.e("test04-1",signatureInfoMap.get("SubjectDN"));
-
     }
 
     private void is_update_imds_app(){

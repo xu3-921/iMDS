@@ -23,8 +23,8 @@ public class UploadMessageReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        //iMdsGetToUploadMessage
 
+        //iMdsGetToUploadMessage
         Bundle bundle = intent.getExtras();
         String action = bundle.getString("action");
         String path = bundle.getString("path");

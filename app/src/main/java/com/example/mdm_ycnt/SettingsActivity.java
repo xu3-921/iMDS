@@ -543,6 +543,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             Preference setting_emergency_alert_btn = findPreference("setting_emergency_alert_btn");
             if (setting_emergency_alert_btn instanceof SwitchPreferenceCompat) {
+
                 SwitchPreferenceCompat switchPref = (SwitchPreferenceCompat) setting_emergency_alert_btn;
                 switchPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
@@ -560,6 +561,7 @@ public class SettingsActivity extends AppCompatActivity {
                         getContext().startService(intent);
                         return true; // 返回 true 以保存變更
                     }
+
                 });
             }
 

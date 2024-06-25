@@ -36,20 +36,20 @@ public class AsyncAidlTool {
                 context, // Context
                 serviceAction,
                 servicePackageName,
-                interfaceCanonicalName // AIDL接口的完整类名
+                interfaceCanonicalName // AIDL介面的完整類別名
         );
 
         binderHelper.bindServiceAsync(new ServiceBinderHelper.ServiceBindListener<Object>() {
             @Override
             public void onServiceBound(Object service) {
 
-                future.complete(new ServiceConnectionResult(service, binderHelper)); // 将服务和binderHelper一起返回
+                future.complete(new ServiceConnectionResult(service, binderHelper)); // 將服務和binder Helper一起返回
 
             }
 
             @Override
             public void onServiceError() {
-                future.completeExceptionally(new Exception("Service binding failed")); // 服务绑定失败，完成 Future 并抛出异常
+                future.completeExceptionally(new Exception("Service binding failed")); // 服務綁定失敗，完成 Future 並拋出異常
             }
         });
 

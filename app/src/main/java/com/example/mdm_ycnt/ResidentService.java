@@ -138,15 +138,6 @@ public class ResidentService extends Service {
     @Override
     public void onCreate() {
 
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//        NotificationChannel mChannel = null;
-//
-//        mChannel = new NotificationChannel(CHANNEL_ID_STRING, getString(R.string.app_name),
-//                    NotificationManager.IMPORTANCE_LOW);
-//        notificationManager.createNotificationChannel(mChannel);
-//        Notification notification = new Notification.Builder(ResidentService.this, CHANNEL_ID_STRING).build();
-//        startForeground(1025, notification);
-
         // 獲取NotificationManager
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -174,270 +165,12 @@ public class ResidentService extends Service {
         receiver = new Control_Receiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction("get_ycnt_mdm_cmd");
-        this.registerReceiver(receiver,filter);
+        this.registerReceiver(receiver, filter);
 
-
-        SharedPreferences sharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(ResidentService.this);
-
-        // 確認緊急回報按鈕是否出現
-        boolean isEmergencyAlertBtnNowOn = (UniversalFunction.isServiceRunning(
-                ResidentService.this,"com.example.mdm_ycnt.EmergencyAlertService"));
-
-
-        boolean isSettingEmergencyAlertOn =
-                sharedPreferences.getBoolean("setting_emergency_alert_btn", true);
-
-        boolean isEmergencyAlertBtnOn = getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
-                .getBoolean("isEmergencyAlertBtnOn", false);
-
-
-        if(!isEmergencyAlertBtnNowOn && (isSettingEmergencyAlertOn && isEmergencyAlertBtnOn)) {
-
-            // 啟動緊急廣播按鈕
-            Intent intent = new Intent(this, EmergencyAlertService.class);
-            intent.putExtra("action", "create");
-            this.startService(intent);
-
-        }
 
         Singleton.getInstance().setSingletonData(new ArrayList<Integer>());
 
-        // 浮動視窗class example
-//        FloatingLayoutConfig config =
-//                new FloatingLayoutConfig.Builder(this)
-//                        .setLayoutRes(R.layout.info_layout)
-//                        .setMovementModule(-1)
-//                        .setGravity(Gravity.END | Gravity.TOP)
-//                        .setX(0)
-//                        .setY(0)
-//                        .setWidth(-2)
-//                        .setHeight(-2)
-//                        .setShow(true)
-//                        .setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH)
-//                        .build();
-//
-//        FloatingLayout floatingWindow = new FloatingLayout(config);
-//
-//        FloatingLayoutConfig config2 =
-//                new FloatingLayoutConfig.Builder(this)
-//                        .setLayoutRes(-1)
-//                        .setMovementModule(FloatingViewMovementModule.MOVE_AXIS_Y)
-//                        .setGravity(Gravity.END | Gravity.TOP)
-////                        .setX(16)
-//                        .setY(200)
-//                        .setWidth(-2)
-//                        .setHeight(-2)
-//                        .setShow(false)
-//                        .build();
-//
-//        FloatingLayout floatingWindow2 = new FloatingLayout(config2);
-//
-//
-//        FloatingListener floatingListener = new FloatingListener() {
-//
-//            @Override
-//            public void onCreate(View view) {
-//
-//                view.setOnTouchListener(new View.OnTouchListener() {
-//                    @Override
-//                    public boolean onTouch(View v, MotionEvent event) {
-//                        switch (event.getAction()) {
-//
-//                            case MotionEvent.ACTION_DOWN:
-//
-//                                return true;
-//
-//                            case MotionEvent.ACTION_OUTSIDE:
-//
-//                                floatingWindow.hide();
-//                                floatingWindow2.show();
-//
-//                                return false;
-//                            default:
-//
-//                                return false;
-//                        }
-//                    }
-//                });
-//
-//
-//                ImageView imageView = view.findViewById(R.id.imageView);
-//                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//                String imageUrl = "http://192.168.89.233/test1.png";
-//
-//                Glide.with(ResidentService.this)
-//                        .load(imageUrl)
-//                        .listener(new RequestListener<Drawable>() {
-//                            @Override
-//                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-//                                // 图片加载失败时的处理
-////                                Log.e("Glide", "Image load failed", e);
-//                                return false; // 返回 false 表示让 Glide 继续处理这个事件
-//                            }
-//
-//                            @Override
-//                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-//                                // 图片加载成功时的处理
-////                                Log.d("Glide", "Image load successful");
-////                                floatingWindow.show();
-//
-////                                layout.post(new Runnable() {
-////                                    @Override
-////                                    public void run() {
-////                                        Animation slideIn = AnimationUtils.loadAnimation(ResidentService.this, com.ycnt.imds.floatingwindow.R.anim.slide_in_from_right);
-////                                        layout.startAnimation(slideIn);
-////                                    }
-////                                });
-//
-//                                return false; // 返回 false 表示让 Glide 继续处理这个事件
-//                            }
-//                        })
-//                        .into(imageView);
-//            }
-//
-//            @Override
-//            public void onClose() {
-//                Log.e("test01-5","onCloseListener");
-//            }
-//
-//            @Override
-//            public void willOpen(View view) {
-//                view.setAlpha(0.0f);
-//            }
-//
-//            @Override
-//            public void didOpen(View view) {
-//
-//                LinearLayout layout = view.findViewById(R.id.layout);
-//
-//                if(layout != null){
-//
-//                    // 建立TranslateAnimation對象
-//                    TranslateAnimation translateAnimation = new TranslateAnimation(
-//                            Animation.RELATIVE_TO_PARENT, 1.0f,  // 從右邊100%
-//                            Animation.RELATIVE_TO_PARENT, 0.0f,  // 到0%
-//                            Animation.RELATIVE_TO_PARENT, 0.0f,  // 從Y軸開始位置
-//                            Animation.RELATIVE_TO_PARENT, 0.0f   // 到Y軸結束位置
-//                    );
-//
-//                    // 設定動畫持續時間
-//                    translateAnimation.setDuration(300);
-//
-//                    view.setAlpha(1.0f);
-//                    layout.startAnimation(translateAnimation);
-//
-//
-//                }else{
-//
-//                    view.setAlpha(1.0f);
-//
-//                }
-//
-//            }
-//
-//            @Override
-//            public void willClose(View view) {
-//
-//            }
-//
-//            @Override
-//            public void didClose(View view) {
-//
-//            }
-//
-//        };
-//
-//        floatingWindow.setFloatingListener(floatingListener);
-//        floatingWindow.create();
-//
-//
-//        FloatingListener floatingListener2 = new FloatingListener() {
-//
-//            @Override
-//            public void onCreate(View view) {
-//
-//                LinearLayout getView = (LinearLayout) view;
-//
-//                // 创建RelativeLayout
-//                RelativeLayout layout = new RelativeLayout(ResidentService.this);
-//                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-//                        10,  // 设置宽度
-//                        96   // 设置高度
-//                );
-//                layout.setLayoutParams(params);
-//
-//                getView.setPadding(4,0,16,0);
-//
-//                // 设置背景颜色
-//                int alpha = 255; // 半透明
-//                int red = 78;
-//                int green = 131;
-//                int blue = 151;
-//                int color = Color.argb(alpha, red, green, blue);
-//
-//                //創建帶有圓角和邊框的GradientDrawable
-//                GradientDrawable drawable = new GradientDrawable();
-//                drawable.setColor(color); // 背景颜色
-//                float cornerRadius = 16 * getResources().getDisplayMetrics().density; // 圆角半径
-//                drawable.setCornerRadius(cornerRadius);
-//                drawable.setStroke(1, Color.parseColor("#afafafb3"));
-//
-//                // 设置drawable为layout的背景
-//                layout.setBackground(drawable);
-//
-//                // 设置clipToOutline和outlineProvider
-//                layout.setClipToOutline(true);
-//                layout.setOutlineProvider(new ViewOutlineProvider() {
-//                    @Override
-//                    public void getOutline(View view, Outline outline) {
-//                        outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius);
-//                    }
-//                });
-//
-//                getView.addView(layout);
-//
-//                view.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View view) {
-//
-//                        floatingWindow.show();
-//                        floatingWindow2.hide();
-//                    }
-//                });
-//
-//            }
-//
-//            @Override
-//            public void onClose() {
-////                Log.e("test01","onCloseListener");
-////                stopSelf();
-//            }
-//
-//            @Override
-//            public void willOpen(View view) {
-//
-//            }
-//
-//            @Override
-//            public void didOpen(View view) {
-//
-//            }
-//
-//            @Override
-//            public void willClose(View view) {
-//
-//            }
-//
-//            @Override
-//            public void didClose(View view) {
-//
-//            }
-//
-//        };
-//
-//        floatingWindow2.setFloatingListener(floatingListener2);
-//        floatingWindow2.create();
+        WidgetControl widgetControl = new WidgetControl(this);
 
     }
 
@@ -465,6 +198,7 @@ public class ResidentService extends Service {
                         startRegisteredFunction(finalIsStartFromBootBroadcast);
 
                     } else {
+
                         SharedPreferences pref = getSharedPreferences("mdm_ycnt", MODE_PRIVATE);
                         SharedPreferences.Editor editor = pref.edit();
                         editor.remove("isDeviceSignUp");
@@ -498,6 +232,34 @@ public class ResidentService extends Service {
     }
 
     private void startRegisteredFunction(boolean isStartFromBootBroadcast){
+
+        SharedPreferences sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(ResidentService.this);
+
+        // 確認緊急回報按鈕是否出現
+        boolean isEmergencyAlertBtnNowOn = (UniversalFunction.isServiceRunning(
+                ResidentService.this,"com.example.mdm_ycnt.EmergencyAlertService"));
+
+
+        boolean isSettingEmergencyAlertOn =
+                sharedPreferences.getBoolean("setting_emergency_alert_btn", true);
+
+        boolean isEmergencyAlertBtnOn = getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
+                .getBoolean("isEmergencyAlertBtnOn", false);
+
+
+        if(!isEmergencyAlertBtnNowOn && (isSettingEmergencyAlertOn && isEmergencyAlertBtnOn)) {
+
+            // 啟動緊急廣播按鈕
+            Intent intent = new Intent(this, EmergencyAlertService.class);
+            intent.putExtra("action", "create");
+            this.startService(intent);
+
+        }
+
+
+
+
 
         String G_control_app_package_name = getSharedPreferences("mdm_ycnt", MODE_PRIVATE)
                 .getString("control_app_package_name", "no_val");
@@ -671,8 +433,6 @@ public class ResidentService extends Service {
                 public void run() {
 
 
-
-
                     String url_domain = UniversalFunction.GetServerIP(ResidentService.this);
                     String phpUrl = url_domain + UPDATE_DEVICE_INFO_URL;
 
@@ -681,7 +441,6 @@ public class ResidentService extends Service {
 
                     //new
                     Object playing_media_id_list = Singleton.getInstance().getSingletonData();
-
 
                     try {
                         deviceStateJson.put("ad_mdm_device_BootTime",Function_Get_device_state.F_get_BootTime());
@@ -1401,16 +1160,12 @@ public class ResidentService extends Service {
 
         switch (cmd){
 
-            //1.0.5
+            // 1.0.5
             case "set-marquee":
-                function_set_cmd_instance.F_set_marquee(value, mContext, nowTime);
+                function_set_cmd_instance.setSilentBroadcast(value, mContext, nowTime);
                 break;
 
-//            case "set-marquee-stop":
-//                function_set_cmd_instance.F_set_marquee_stop(mContext);
-//                break;
-
-            //1.0.6
+            // 1.0.6
             case "set-url":
                 function_set_cmd_instance.F_set_open_web(value, mContext);
                 break;
@@ -1420,10 +1175,6 @@ public class ResidentService extends Service {
             case "set-install-apk":
                 function_set_cmd_instance.F_set_install_app(value, mContext);
                 break;
-
-//            case "set-update-control-app":
-//                Function_set_cmd.F_set_open_web(value,mContext);
-//                break;
 
             case "set-audio":
                 function_set_cmd_instance.F_set_audio(value, mContext, nowTime);
@@ -1439,6 +1190,11 @@ public class ResidentService extends Service {
 
             case "set-stop-media":
                 function_set_cmd_instance.F_stop_floating_window(value, mContext);
+                break;
+
+            // 1.0.9
+            case "set-text":
+                function_set_cmd_instance.setTextBroadcast(value, mContext, nowTime);
                 break;
 
         }
